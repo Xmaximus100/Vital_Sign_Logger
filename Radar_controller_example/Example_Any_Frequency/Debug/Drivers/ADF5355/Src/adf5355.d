@@ -1,9 +1,5 @@
 Drivers/ADF5355/Src/adf5355.o: ../Drivers/ADF5355/Src/adf5355.c \
- C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_error.h \
- C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_util.h \
- C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_alloc.h \
- ../Core/Inc/delay.h \
- C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/adf5355.h \
+ ../Core/Inc/spi.h ../Core/Inc/main.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h \
  ../Core/Inc/stm32l4xx_hal_conf.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_rcc.h \
@@ -34,12 +30,14 @@ Drivers/ADF5355/Src/adf5355.o: ../Drivers/ADF5355/Src/adf5355.c \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim_ex.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart_ex.h \
+ C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_error.h \
+ C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_util.h \
+ C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_alloc.h \
+ ../Core/Inc/delay.h \
+ C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/adf5355.h \
  ../Core/Inc/main.h
-C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_error.h:
-C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_util.h:
-C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_alloc.h:
-../Core/Inc/delay.h:
-C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/adf5355.h:
+../Core/Inc/spi.h:
+../Core/Inc/main.h:
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h:
 ../Core/Inc/stm32l4xx_hal_conf.h:
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_rcc.h:
@@ -70,4 +68,9 @@ C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/V
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim_ex.h:
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart.h:
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart_ex.h:
+C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_error.h:
+C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_util.h:
+C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_alloc.h:
+../Core/Inc/delay.h:
+C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/adf5355.h:
 ../Core/Inc/main.h:

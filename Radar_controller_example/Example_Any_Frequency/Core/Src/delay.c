@@ -7,8 +7,9 @@
 
 #include "delay.h"
 #include <stdlib.h>
-#include "stm32l4xx_hal.h"
 #include "math.h"
+#include "FreeRTOS.h"
+#include "task.h"
 #include "main.h"
 
 /*****************************Private Variables********************************/
@@ -21,9 +22,9 @@ static TIM_HandleTypeDef s_TimerInstance = {
 /************************** Functions Implementation **************************/
 /******************************************************************************/
 
-void Initialize_Delay()
+HAL_StatusTypeDef Initialize_Delay()
 {
-	HAL_TIM_Base_Start(&htim6);
+	return HAL_TIM_Base_Start(&htim6);
 }
 
 void delay_us(uint32_t us)
@@ -33,11 +34,13 @@ void delay_us(uint32_t us)
 //		adf5355_delay_ms(ceil(us/1000));
 //		return;
 //	}
+	taskENTER_CRITICAL();
 	int timer_val_start = __HAL_TIM_GET_COUNTER(&s_TimerInstance);
 	int timer_val = timer_val_start;
 	while(abs(timer_val - timer_val_start) < us){
 		timer_val = __HAL_TIM_GET_COUNTER(&s_TimerInstance);
 	}
+	taskEXIT_CRITICAL();
 }
 
 void delay_ms(uint32_t ms)

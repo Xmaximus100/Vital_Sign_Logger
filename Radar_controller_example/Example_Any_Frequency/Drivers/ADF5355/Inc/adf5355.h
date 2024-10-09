@@ -185,6 +185,12 @@
 /*************************** Types Declarations *******************************/
 /******************************************************************************/
 
+typedef enum
+{
+  ADF5355_DIS = 0U,
+  ADF5355_EN
+} AD5355_State;
+
 /**
  * @enum adf5355_device_id
  * @brief Devices supported by the drivers.
@@ -285,6 +291,12 @@ struct adf5355_init_param {
 /******************************************************************************/
 /************************ Functions Declarations ******************************/
 /******************************************************************************/
+
+void* ADF5355_SetFrequency(void* new_freq);
+void* ADF5355_SetPower(void* new_pow);
+void* ADF5355_Enable(void* state);
+
+void ADF5355_Param_Init(void);
 
 /* Recalculate rate corresponding to a channel. */
 int32_t adf5355_clk_recalc_rate(struct adf5355_dev *dev, uint32_t chan,

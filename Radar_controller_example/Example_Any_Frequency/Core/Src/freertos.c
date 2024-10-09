@@ -57,8 +57,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-struct adf5355_init_param hadf5355;
-Data_Collector* ad7676_data;
+
+data_Collector_TypeDef* ad7676_data;
 RingBuffer buffer;
 uint8_t receive_tmp;
 uint8_t received_lines = 0;
@@ -87,7 +87,7 @@ const osThreadAttr_t pll_handler_attributes = {
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-static void ADF5355_Param_Init(void);
+
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
@@ -175,7 +175,7 @@ void StartADC(void *argument)
   /* Infinite loop */
   for(;;)
   {
-//	  UART_Log("Hello World\n\r");
+//	  UARTLog("Hello World\n\r");
 //	  osDelay(1);
 	  if(received_lines > 0){
 		  ParserTakeLine(&buffer, received_data);
@@ -196,9 +196,9 @@ void StartADC(void *argument)
 void StartPLL(void *argument)
 {
   /* USER CODE BEGIN StartPLL */
-	Initialize_Delay();
-	ADF5355_Param_Init();
-	basic_example_main(&hadf5355);
+
+//	ADF5355_Param_Init();
+//	basic_example_main(&hadf5355);
   /* Infinite loop */
   for(;;)
   {
@@ -209,30 +209,6 @@ void StartPLL(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-static void ADF5355_Param_Init(void){
-	hadf5355.spi_init = &hspi3; // Wskaźnik do struktury SPI init
-	hadf5355.dev_id = 1; // Identyfikator urządzenia ADF5355
-	hadf5355.freq_req = 12000000000; // Żądana częstotliwość wyjściowa w Hz
-	hadf5355.freq_req_chan = 0; // Kanał częstotliwości
-	hadf5355.clkin_freq = 120000000; // Częstotliwość zegara wejściowego w Hz
-	hadf5355.cp_ua = 1000; // Prąd pompy ładunkowej w mikroamperach
-	hadf5355.cp_neg_bleed_en = false; // Flaga aktywacji negatywnego prądu wycieku
-	hadf5355.cp_gated_bleed_en = false;  // Flaga aktywacji bramkowania prądu wycieku
-	hadf5355.cp_bleed_current_polarity_en = false;  // Flaga aktywacji biegunowości prądu wycieku
-	hadf5355.mute_till_lock_en = false; // Flaga aktywacji funkcji mute till lock
-	hadf5355.outa_en = true;  // Flaga aktywacji wyjścia A
-	hadf5355.outb_en = false;  // Flaga aktywacji wyjścia B
-	hadf5355.outa_power = 10;  // Moc wyjścia A
-	hadf5355.outb_power = 0;  // Moc wyjścia B
-	hadf5355.phase_detector_polarity_neg = true;  // Flaga aktywacji negatywnej polaryzacji detektora fazy
-	hadf5355.ref_diff_en = false;  // Flaga aktywacji różnicowego wejścia referencyjnego
-	hadf5355.mux_out_3v3_en = true;  // Flaga aktywacji wyjścia mux na 3,3V
-	hadf5355.ref_doubler_en = false;  // Flaga aktywacji podwajacza częstotliwości referencyjnej
-	hadf5355.ref_div2_en = false;  // Flaga aktywacji podzielnika przez 2
-	hadf5355.mux_out_sel = 0;  // Wybór wyjścia mux
-	hadf5355.outb_sel_fund = false;  // Flaga wyboru częstotliwości podstawowej na wyjściu B
-}
-
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {

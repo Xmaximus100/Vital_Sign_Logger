@@ -1,6 +1,6 @@
 ../Drivers/AD7676/Src/ad7676.c:11:6:HAL_GPIO_EXTI_Callback	16	static
-../Drivers/AD7676/Src/ad7676.c:18:1:ad7676_init	24	static
-../Drivers/AD7676/Src/ad7676.c:30:1:ad7676_acquire_data	16	static
-../Drivers/AD7676/Src/ad7676.c:35:1:ad7676_read_one_sample	16	static
-../Drivers/AD7676/Src/ad7676.c:46:1:ad7676_reset_data	24	static
-../Drivers/AD7676/Src/ad7676.c:54:1:ad7676_start_conversion	8	static
+../Drivers/AD7676/Src/ad7676.c:18:6:ad7676_init	24	static
+../Drivers/AD7676/Src/ad7676.c:30:6:ad7676_acquire_data	16	static
+../Drivers/AD7676/Src/ad7676.c:35:6:ad7676_read_one_sample	16	static
+../Drivers/AD7676/Src/ad7676.c:46:6:ad7676_reset_data	24	static
+../Drivers/AD7676/Src/ad7676.c:54:6:ad7676_start_conversion	8	static

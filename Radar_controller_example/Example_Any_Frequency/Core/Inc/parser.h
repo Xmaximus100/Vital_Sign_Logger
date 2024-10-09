@@ -10,6 +10,18 @@
 
 #define ENDLINE '\n'
 
+//typedef struct __responses {
+//
+//}responses_TypeDef;
+
+typedef struct __at_Commands {
+	char* command;
+	char* responsePositive;
+	char* responseNegative;
+	void* (*function)(void*);
+	uint8_t optional_argument;
+}at_Commands_TypeDef;
+
 void ParserTakeLine(RingBuffer* buffer, uint8_t* destination);
 void ParserParse(char* received_string);
 

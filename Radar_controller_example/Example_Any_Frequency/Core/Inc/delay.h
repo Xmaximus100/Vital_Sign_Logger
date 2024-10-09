@@ -9,8 +9,9 @@
 #define INC_DELAY_H_
 
 #include "stdint.h"
+#include "stm32l4xx_hal.h"
 
-void Initialize_Delay(void);
+HAL_StatusTypeDef Initialize_Delay(void);
 
 void delay_us(uint32_t us);
 

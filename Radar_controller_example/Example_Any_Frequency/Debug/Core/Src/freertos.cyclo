@@ -2,5 +2,4 @@
 ../Core/Src/freertos.c:152:6:StartDefaultTask	1
 ../Core/Src/freertos.c:170:6:StartADC	2
 ../Core/Src/freertos.c:196:6:StartPLL	1
-../Core/Src/freertos.c:212:13:ADF5355_Param_Init	1
-../Core/Src/freertos.c:237:6:HAL_UART_RxCpltCallback	4
+../Core/Src/freertos.c:213:6:HAL_UART_RxCpltCallback	4

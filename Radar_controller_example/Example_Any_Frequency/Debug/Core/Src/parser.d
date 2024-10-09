@@ -29,7 +29,9 @@ Core/Src/parser.o: ../Core/Src/parser.c ../Core/Inc/main.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim_ex.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart_ex.h \
- ../Core/Inc/utils.h ../Core/Inc/ring_buffer.h ../Core/Inc/parser.h
+ ../Core/Inc/utils.h ../Core/Inc/ring_buffer.h \
+ C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/adf5355.h \
+ ../Core/Inc/parser.h
 ../Core/Inc/main.h:
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h:
 ../Core/Inc/stm32l4xx_hal_conf.h:
@@ -63,4 +65,5 @@ Core/Src/parser.o: ../Core/Src/parser.c ../Core/Inc/main.h \
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart_ex.h:
 ../Core/Inc/utils.h:
 ../Core/Inc/ring_buffer.h:
+C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/adf5355.h:
 ../Core/Inc/parser.h:

@@ -104,6 +104,7 @@ int main(void)
 
   /* Initialize interrupts */
   MX_NVIC_Init();
+  Initialize_Delay();
   /* USER CODE BEGIN 2 */
 //  uint8_t test_tab[4] = {2, 5, 6, 8};
 //  ADF5355_CS_OFF;

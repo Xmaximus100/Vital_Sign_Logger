@@ -8,6 +8,8 @@
 #ifndef INC_UTILS_H_
 #define INC_UTILS_H_
 
-void UART_Log(char* message);
+void UARTLog(char* message);
+void* LightLED(void* state);
+void* LoadADF5355(void* arg);
 
 #endif /* INC_UTILS_H_ */

@@ -7,15 +7,15 @@
 
 #include <stdint.h>
 
-typedef struct __Data_Collector {
+typedef struct __data_Collector {
 	uint16_t data_buf[65535];
 	uint16_t data_ptr;
 	uint16_t data_ptr_max;
-} Data_Collector;
+} data_Collector_TypeDef;
 
-void ad7676_init(Data_Collector** ad7676_data);
+void ad7676_init(data_Collector_TypeDef** ad7676_data);
 
-void ad7676_acquire_data(Data_Collector* ad7676_data, int16_t sample);
+void ad7676_acquire_data(data_Collector_TypeDef* ad7676_data, int16_t sample);
 
 void ad7676_read_samples(uint8_t* data, uint32_t samples);
 
