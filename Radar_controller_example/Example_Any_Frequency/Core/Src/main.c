@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "dma.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -98,14 +99,15 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_TIM6_Init();
   MX_SPI3_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
-  Initialize_Delay();
   /* USER CODE BEGIN 2 */
+  Initialize_Delay();
 //  uint8_t test_tab[4] = {2, 5, 6, 8};
 //  ADF5355_CS_OFF;
 //  HAL_SPI_Transmit(&hspi2, test_tab, 4, HAL_MAX_DELAY);
@@ -113,7 +115,7 @@ int main(void)
 //  HAL_TIM_Base_Start(&htim6);
 
 //  for(int i=0;i<4;i++){
-//	  WriteToBuffer(&rb, i*2);
+//	  WriteToBuffer(&rb, i*2, 1);
 //  }
 //  for(int i=0;i<4;i++){
 //	  ReadFromBuffer(&rb, test_val+i);
@@ -208,6 +210,12 @@ static void MX_NVIC_Init(void)
   /* USART2_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(USART2_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(USART2_IRQn);
+  /* DMA1_Channel7_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
+  /* DMA1_Channel6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
 }
 
 /* USER CODE BEGIN 4 */

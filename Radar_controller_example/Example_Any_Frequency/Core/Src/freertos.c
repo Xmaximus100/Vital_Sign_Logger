@@ -60,7 +60,7 @@
 
 data_Collector_TypeDef* ad7676_data;
 RingBuffer buffer;
-uint8_t receive_tmp;
+uint8_t receive_tmp[32];
 uint8_t received_lines = 0;
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
@@ -84,6 +84,13 @@ const osThreadAttr_t pll_handler_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for at_cmds_handler */
+osThreadId_t at_cmds_handlerHandle;
+const osThreadAttr_t at_cmds_handler_attributes = {
+  .name = "at_cmds_handler",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -93,6 +100,7 @@ const osThreadAttr_t pll_handler_attributes = {
 void StartDefaultTask(void *argument);
 void StartADC(void *argument);
 void StartPLL(void *argument);
+void StartATCmds(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -132,6 +140,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of pll_handler */
   pll_handlerHandle = osThreadNew(StartPLL, NULL, &pll_handler_attributes);
 
+  /* creation of at_cmds_handler */
+  at_cmds_handlerHandle = osThreadNew(StartATCmds, NULL, &at_cmds_handler_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -152,11 +163,16 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
+	uint8_t tmp_buf[20];
+	uint8_t len;
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	for(;;)
+	{
+//		len = sprintf(tmp_buf, "TestDMA\n\r");
+//		HAL_UART_Transmit_DMA(&huart2, tmp_buf, len); //To prevent receiving constant interrupts after sending
+														//simply i
+//		osDelay(500);
+	}
   /* USER CODE END StartDefaultTask */
 }
 
@@ -170,19 +186,13 @@ void StartDefaultTask(void *argument)
 void StartADC(void *argument)
 {
   /* USER CODE BEGIN StartADC */
-	uint8_t received_data[32];
-	HAL_UART_Receive_IT(&huart2, &receive_tmp, 1);
   /* Infinite loop */
-  for(;;)
-  {
-//	  UARTLog("Hello World\n\r");
-//	  osDelay(1);
-	  if(received_lines > 0){
-		  ParserTakeLine(&buffer, received_data);
-		  ParserParse((char*)received_data);
-		  received_lines--;
-	  }
-  }
+	for(;;)
+	{
+	//	  UARTLog("Hello World\n\r");
+		osThreadFlagsWait(0x01, osFlagsWaitAll, osWaitForever);
+		ad7676_start_conversion();
+	}
   /* USER CODE END StartADC */
 }
 
@@ -200,25 +210,83 @@ void StartPLL(void *argument)
 //	ADF5355_Param_Init();
 //	basic_example_main(&hadf5355);
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	for(;;)
+	{
+		osDelay(1);
+	}
   /* USER CODE END StartPLL */
+}
+
+/* USER CODE BEGIN Header_StartATCmds */
+/**
+* @brief Function implementing the at_cmds_handler thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartATCmds */
+void StartATCmds(void *argument)
+{
+  /* USER CODE BEGIN StartATCmds */
+	uint8_t received_data[32];
+	//	HAL_UART_Receive_IT(&huart2, &receive_tmp, 1);
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, receive_tmp, 32);
+  /* Infinite loop */
+	for(;;)
+	{
+		if(received_lines > 0){
+		  ParserTakeLine(&buffer, received_data);
+		  ParserParse((char*)received_data);
+		  received_lines--;
+		}
+	}
+  /* USER CODE END StartATCmds */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
+  /* Prevent unused argument(s) compilation warning */
 	if(huart->Instance == USART2){
-		if(RB_OK == WriteToBuffer(&buffer, receive_tmp)){
-			if(receive_tmp == ENDLINE){
+		if(RB_OK == WriteToBuffer(&buffer, receive_tmp, Size)){
+			if(receive_tmp[Size-1] == ENDLINE){
 				received_lines++;
 			}
 		}
-		HAL_UART_Receive_IT(&huart2, &receive_tmp, 1);
+		else FlushBuffer(&buffer);
+		HAL_UARTEx_ReceiveToIdle_DMA(&huart2, receive_tmp, 32);
+	}
+
+  /* NOTE : This function should not be modified, when the callback is needed,
+            the HAL_UARTEx_RxEventCallback can be implemented in the user file.
+   */
+}
+
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//	if(huart->Instance == USART2){
+//		if(RB_OK == WriteToBuffer(&buffer, receive_tmp, 1)){
+//			if(receive_tmp == ENDLINE){
+//				received_lines++;
+//			}
+//		}
+//		HAL_UART_Receive_IT(&huart2, &receive_tmp, 1);
+//	}
+//}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+  /* Prevent unused argument(s) compilation warning */
+  if (huart->Instance == USART2){
+
+  }
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if (GPIO_Pin == AD_BUSY_Pin){
+		ad7676_read_one_sample();
+		osThreadFlagsSet(adc_handlerHandle, 0x01);
 	}
 }
 /* USER CODE END Application */

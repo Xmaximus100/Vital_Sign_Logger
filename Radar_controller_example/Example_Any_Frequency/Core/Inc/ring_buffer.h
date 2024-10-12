@@ -27,9 +27,9 @@ typedef struct
 	uint16_t Tail;
 } RingBuffer;
 
-uint8_t WriteToBuffer(RingBuffer *Buffer, uint8_t Data);
+uint8_t WriteToBuffer(RingBuffer *Buffer, uint8_t *Data, uint8_t Len);
 uint8_t ReadFromBuffer(RingBuffer *Buffer, uint8_t *Data);
-void Flush_Buffer(RingBuffer *Buffer);
+void FlushBuffer(RingBuffer *Buffer);
 
 
 #endif /* INC_RING_BUFFER_H_ */

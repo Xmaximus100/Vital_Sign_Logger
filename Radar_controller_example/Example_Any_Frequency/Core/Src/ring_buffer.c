@@ -7,24 +7,25 @@
 
 #include "ring_buffer.h"
 
-uint8_t WriteToBuffer(RingBuffer *Buffer, uint8_t Data)
+uint8_t WriteToBuffer(RingBuffer *Buffer, uint8_t *Data, uint8_t Len)
 {
 	uint8_t TempHead;
 
-	TempHead = (Buffer->Head + 1) % BUFFER_SIZE;
+	for(int i=0; i<Len; i++){
+		TempHead = (Buffer->Head + 1) % BUFFER_SIZE;
 
-	if( TempHead == Buffer->Tail) // No room for new data
-	{
-		return RB_ERROR;
+		if( TempHead == Buffer->Tail) // No room for new data
+		{
+			return RB_ERROR;
+		}
+		else
+		{
+			Buffer->Buffer[Buffer->Head] = *(Data+i);
+
+			Buffer->Head++;
+			Buffer->Head %= BUFFER_SIZE;
+		}
 	}
-	else
-	{
-            Buffer->Buffer[Buffer->Head] = Data;
-
-            Buffer->Head++;
-            Buffer->Head %= BUFFER_SIZE;
-	}
-
 	return RB_OK;
 }
 

@@ -8,12 +8,6 @@
 
 extern data_Collector_TypeDef* ad7676_data;
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-	if (GPIO_Pin == AD_BUSY_Pin){
-		ad7676_read_one_sample();
-	}
-}
 
 void ad7676_init(data_Collector_TypeDef** ad7676_data)
 {
@@ -40,7 +34,7 @@ void ad7676_read_one_sample()
 //	Pin PB3 reserved for SWD
 	int16_t sample = (GPIOB->IDR & AD7676_GPIOB_MASK) | ((GPIOC->IDR & AD7676_GPIOC_MASK) << 15);
 	ad7676_acquire_data(ad7676_data, sample);
-	AD7676_CNVST_OFF;
+	AD7676_CNVST_ON;
 }
 
 void ad7676_reset_data(data_Collector_TypeDef* ad7676_data)
@@ -53,5 +47,5 @@ void ad7676_reset_data(data_Collector_TypeDef* ad7676_data)
 
 void ad7676_start_conversion()
 {
-	AD7676_CNVST_ON;
+	AD7676_CNVST_OFF;
 }
