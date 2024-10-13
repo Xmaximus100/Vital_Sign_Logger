@@ -124,6 +124,35 @@ void ADF5355_Param_Init(void){
 	hadf5355.outb_sel_fund = false;  // Flaga wyboru częstotliwości podstawowej na wyjściu B
 }
 
+static void adf5355_calc_pfd(struct adf5355_dev *dev)
+{
+	uint32_t tmp;
+	dev->ref_div_factor = 0;
+
+	/* Calculate and maximize PFD frequency */
+	do {
+		dev->ref_div_factor++;
+		dev->fpfd = (dev->clkin_freq * (dev->ref_doubler_en ? 2 : 1)) /
+			    (dev->ref_div_factor * (dev->ref_div2_en ? 2 : 1));
+	} while (dev->fpfd > ADF5355_MAX_FREQ_PFD);
+
+	tmp = NO_OS_DIV_ROUND_CLOSEST(dev->cp_ua - 315, 315U);
+	tmp = no_os_clamp(tmp, 0U, 15U);
+
+	dev->regs[ADF5355_REG(4)] = ADF5355_REG4_COUNTER_RESET_EN(0) |
+				    ADF5355_REG4_CP_THREESTATE_EN(0) |
+				    ADF5355_REG4_POWER_DOWN_EN(0) |
+				    ADF5355_REG4_PD_POLARITY_POS(!dev->phase_detector_polarity_neg) |
+				    ADF5355_REG4_MUX_LOGIC(dev->mux_out_3v3_en) |
+				    ADF5355_REG4_REFIN_MODE_DIFF(dev->ref_diff_en) |
+				    ADF5355_REG4_CHARGE_PUMP_CURR(tmp) |
+				    ADF5355_REG4_DOUBLE_BUFF_EN(1) |
+				    ADF5355_REG4_10BIT_R_CNT(dev->ref_div_factor) |
+				    ADF5355_REG4_RDIV2_EN(dev->ref_div2_en) |
+				    ADF5355_REG4_RMULT2_EN(dev->ref_doubler_en) |
+				    ADF5355_REG4_MUXOUT(dev->mux_out_sel);
+}
+
 /**
  * SPI register write to device.
  * @param dev - The device structure.
@@ -209,7 +238,7 @@ static int32_t adf5355_reg_config(struct adf5355_dev *dev, bool sync_all)
 	max_reg = ((dev->dev_id == ADF4356)
 		   || (dev->dev_id == ADF5356)) ? ADF5355_REG(13) : ADF5355_REG(12);
 
-	if (sync_all || !dev->all_synced) {
+	if ((sync_all || !dev->all_synced) && dev->fpfd <= 75000000) {
 		for (i = max_reg; i >= ADF5355_REG(1); i--) {
 			ret = adf5355_write(dev, ADF5355_REG(i), dev->regs[i]);
 			if (ret != 0)
@@ -218,7 +247,11 @@ static int32_t adf5355_reg_config(struct adf5355_dev *dev, bool sync_all)
 
 		dev->all_synced = true;
 
-	} else {
+	}
+	else if ((sync_all || !dev->all_synced) && dev->fpfd > 75000000 ) {
+
+	}
+	else {
 		if((dev->dev_id == ADF4356) || (dev->dev_id == ADF5356)) {
 			ret = adf5355_write(dev, ADF5355_REG(13), dev->regs[ADF5355_REG(13)]);
 			if (ret != 0)
@@ -263,6 +296,58 @@ static int32_t adf5355_reg_config(struct adf5355_dev *dev, bool sync_all)
 	else
 	{
 		delay_us(dev->delay_us);
+	}
+
+	if (dev->fpfd > 75000000) { //needs to be verified
+		ret = adf5355_write(dev, ADF5355_REG(0), dev->regs[0]);
+		if (ret != 0)
+			return ret;
+
+		uint32_t cp_bleed;
+		bool prescaler, cp_neg_bleed_en;
+		dev->ref_div2_en = false;
+
+		adf5355_calc_pfd(dev);
+
+		adf5355_pll_fract_n_compute(dev->freq_req, dev->fpfd, &dev->integer, &dev->fract1,
+						    &dev->fract2, &dev->mod2, ADF5355_MAX_MODULUS2);
+
+		prescaler = (dev->integer >= ADF5355_MIN_INT_PRESCALER_89);
+
+		if (dev->fpfd > 100000000UL || ((dev->fract1 == 0) && (dev->fract2 == 0)))
+			cp_neg_bleed_en = false;
+		else
+			cp_neg_bleed_en = dev->cp_neg_bleed_en;
+
+		if ((dev->dev_id == ADF4356) || (dev->dev_id == ADF5356)) {
+			cp_bleed = (24U * (dev->fpfd / 1000) * dev->cp_ua) / (61440 * 900);
+		} else {
+			cp_bleed = NO_OS_DIV_ROUND_UP(400 * dev->cp_ua, dev->integer * 375);
+		}
+
+		cp_bleed = no_os_clamp(cp_bleed, 1U, 255U);
+
+		dev->regs[ADF5355_REG(0)] = ADF5355_REG0_INT(dev->integer) |
+						ADF5355_REG0_PRESCALER(prescaler) |
+						ADF5355_REG0_AUTOCAL(0); //autocalibration needs to be disabled
+
+		dev->regs[ADF5355_REG(1)] = ADF5355_REG1_FRACT(dev->fract1);
+
+		dev->regs[ADF5355_REG(2)] = ADF5355_REG2_MOD2(dev->mod2) |
+						ADF5355_REG2_FRAC2(dev->fract2);
+
+		ret = adf5355_write(dev, ADF5355_REG(4), dev->regs[4]);
+		if (ret != 0)
+			return ret;
+
+		ret = adf5355_write(dev, ADF5355_REG(2), dev->regs[2]);
+		if (ret != 0)
+			return ret;
+
+		ret = adf5355_write(dev, ADF5355_REG(1), dev->regs[1]);
+		if (ret != 0)
+			return ret;
+		//REGs 0 for halved, 4 for desired, then 2, 1, 0
 	}
 
 	return adf5355_write(dev, ADF5355_REG(0), dev->regs[0]);
@@ -462,32 +547,7 @@ int32_t adf5355_clk_round_rate(struct adf5355_dev *dev, uint64_t rate,
  */
 static int32_t adf5355_setup(struct adf5355_dev *dev)
 {
-	uint32_t tmp;
-
-	dev->ref_div_factor = 0;
-
-	/* Calculate and maximize PFD frequency */
-	do {
-		dev->ref_div_factor++;
-		dev->fpfd = (dev->clkin_freq * (dev->ref_doubler_en ? 2 : 1)) /
-			    (dev->ref_div_factor * (dev->ref_div2_en ? 2 : 1));
-	} while (dev->fpfd > ADF5355_MAX_FREQ_PFD);
-
-	tmp = NO_OS_DIV_ROUND_CLOSEST(dev->cp_ua - 315, 315U);
-	tmp = no_os_clamp(tmp, 0U, 15U);
-
-	dev->regs[ADF5355_REG(4)] = ADF5355_REG4_COUNTER_RESET_EN(0) |
-				    ADF5355_REG4_CP_THREESTATE_EN(0) |
-				    ADF5355_REG4_POWER_DOWN_EN(0) |
-				    ADF5355_REG4_PD_POLARITY_POS(!dev->phase_detector_polarity_neg) |
-				    ADF5355_REG4_MUX_LOGIC(dev->mux_out_3v3_en) |
-				    ADF5355_REG4_REFIN_MODE_DIFF(dev->ref_diff_en) |
-				    ADF5355_REG4_CHARGE_PUMP_CURR(tmp) |
-				    ADF5355_REG4_DOUBLE_BUFF_EN(1) |
-				    ADF5355_REG4_10BIT_R_CNT(dev->ref_div_factor) |
-				    ADF5355_REG4_RDIV2_EN(dev->ref_div2_en) |
-				    ADF5355_REG4_RMULT2_EN(dev->ref_doubler_en) |
-				    ADF5355_REG4_MUXOUT(dev->mux_out_sel);
+	adf5355_calc_pfd(dev);
 
 	dev->regs[ADF5355_REG(5)] = ADF5355_REG5_DEFAULT;
 
@@ -502,6 +562,8 @@ static int32_t adf5355_setup(struct adf5355_dev *dev)
 	dev->regs[ADF5355_REG(8)] = ((dev->dev_id == ADF4356)
 				     || (dev->dev_id == ADF5356)) ? ADF5356_REG8_DEFAULT :
 				    ADF5355_REG8_DEFAULT;
+
+	uint32_t tmp;
 
 	/* Calculate Timeouts */
 	tmp = NO_OS_DIV_ROUND_UP(dev->fpfd, 20000U * 30U);
@@ -576,6 +638,8 @@ int32_t adf5355_init(struct adf5355_dev **device,
 	dev->mux_out_sel = init_param->mux_out_sel;
 	dev->outb_sel_fund = init_param->outb_sel_fund;
 	dev->num_channels = 2;
+
+	if (dev->clkin_freq > 75000000) dev->ref_div2_en = true;
 
 	switch (dev->dev_id) {
 	case ADF4356:
