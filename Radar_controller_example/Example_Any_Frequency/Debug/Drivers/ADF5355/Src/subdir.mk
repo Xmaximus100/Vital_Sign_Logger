@@ -6,14 +6,17 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Drivers/ADF5355/Src/adf5355.c \
+../Drivers/ADF5355/Src/adf5355_api.c \
 ../Drivers/ADF5355/Src/basic_example.c 
 
 OBJS += \
 ./Drivers/ADF5355/Src/adf5355.o \
+./Drivers/ADF5355/Src/adf5355_api.o \
 ./Drivers/ADF5355/Src/basic_example.o 
 
 C_DEPS += \
 ./Drivers/ADF5355/Src/adf5355.d \
+./Drivers/ADF5355/Src/adf5355_api.d \
 ./Drivers/ADF5355/Src/basic_example.d 
 
 
@@ -24,7 +27,7 @@ Drivers/ADF5355/Src/%.o Drivers/ADF5355/Src/%.su Drivers/ADF5355/Src/%.cyclo: ..
 clean: clean-Drivers-2f-ADF5355-2f-Src
 
 clean-Drivers-2f-ADF5355-2f-Src:
-	-$(RM) ./Drivers/ADF5355/Src/adf5355.cyclo ./Drivers/ADF5355/Src/adf5355.d ./Drivers/ADF5355/Src/adf5355.o ./Drivers/ADF5355/Src/adf5355.su ./Drivers/ADF5355/Src/basic_example.cyclo ./Drivers/ADF5355/Src/basic_example.d ./Drivers/ADF5355/Src/basic_example.o ./Drivers/ADF5355/Src/basic_example.su
+	-$(RM) ./Drivers/ADF5355/Src/adf5355.cyclo ./Drivers/ADF5355/Src/adf5355.d ./Drivers/ADF5355/Src/adf5355.o ./Drivers/ADF5355/Src/adf5355.su ./Drivers/ADF5355/Src/adf5355_api.cyclo ./Drivers/ADF5355/Src/adf5355_api.d ./Drivers/ADF5355/Src/adf5355_api.o ./Drivers/ADF5355/Src/adf5355_api.su ./Drivers/ADF5355/Src/basic_example.cyclo ./Drivers/ADF5355/Src/basic_example.d ./Drivers/ADF5355/Src/basic_example.o ./Drivers/ADF5355/Src/basic_example.su
 
 .PHONY: clean-Drivers-2f-ADF5355-2f-Src
 

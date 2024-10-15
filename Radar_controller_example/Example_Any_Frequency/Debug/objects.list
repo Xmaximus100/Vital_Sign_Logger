@@ -18,6 +18,7 @@
 "./Core/Startup/startup_stm32l476rgtx.o"
 "./Drivers/AD7676/Src/ad7676.o"
 "./Drivers/ADF5355/Src/adf5355.o"
+"./Drivers/ADF5355/Src/adf5355_api.o"
 "./Drivers/ADF5355/Src/basic_example.o"
 "./Drivers/No_OS/Src/no_os_alloc.o"
 "./Drivers/No_OS/Src/no_os_util.o"

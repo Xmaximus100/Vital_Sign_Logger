@@ -288,15 +288,12 @@ struct adf5355_init_param {
 	bool                        outb_sel_fund;
 };
 
-/******************************************************************************/
-/************************ Functions Declarations ******************************/
-/******************************************************************************/
 
-void* ADF5355_SetFrequency(void* new_freq);
-void* ADF5355_SetPower(void* new_pow);
-void* ADF5355_Enable(void* state);
+/* Change frequency on going */
+int32_t adf5355_change_freq(struct adf5355_dev *dev, uint64_t freq);
 
-void ADF5355_Param_Init(void);
+/* Change state and power on going */
+int32_t adf5355_set_power(struct adf5355_dev *dev, bool en, uint8_t power);
 
 /* Recalculate rate corresponding to a channel. */
 int32_t adf5355_clk_recalc_rate(struct adf5355_dev *dev, uint32_t chan,

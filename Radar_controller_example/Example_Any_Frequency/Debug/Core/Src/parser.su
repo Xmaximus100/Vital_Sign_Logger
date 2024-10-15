@@ -1,2 +1,2 @@
-../Core/Src/parser.c:25:6:ParserTakeLine	24	static
-../Core/Src/parser.c:40:6:ParserParse	96	static
+../Core/Src/parser.c:28:6:ParserTakeLine	24	static
+../Core/Src/parser.c:43:6:ParserParse	112	static
