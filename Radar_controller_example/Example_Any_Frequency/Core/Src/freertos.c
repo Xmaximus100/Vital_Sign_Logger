@@ -38,6 +38,7 @@
 #include "basic_example.h"
 #include "ring_buffer.h"
 #include "parser.h"
+#include "utils.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -68,14 +69,14 @@ osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for adc_handler */
 osThreadId_t adc_handlerHandle;
 const osThreadAttr_t adc_handler_attributes = {
   .name = "adc_handler",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityLow5,
 };
 /* Definitions for pll_handler */
 osThreadId_t pll_handlerHandle;
@@ -89,7 +90,7 @@ osThreadId_t at_cmds_handlerHandle;
 const osThreadAttr_t at_cmds_handler_attributes = {
   .name = "at_cmds_handler",
   .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -171,7 +172,7 @@ void StartDefaultTask(void *argument)
 //		len = sprintf(tmp_buf, "TestDMA\n\r");
 //		HAL_UART_Transmit_DMA(&huart2, tmp_buf, len); //To prevent receiving constant interrupts after sending
 														//simply i
-//		osDelay(500);
+		osDelay(10);
 	}
   /* USER CODE END StartDefaultTask */
 }
@@ -212,7 +213,8 @@ void StartPLL(void *argument)
   /* Infinite loop */
 	for(;;)
 	{
-		osDelay(1);
+//		UARTLog("Hello World\n\r");
+		osDelay(10);
 	}
   /* USER CODE END StartPLL */
 }
@@ -230,6 +232,7 @@ void StartATCmds(void *argument)
 	uint8_t received_data[32];
 	//	HAL_UART_Receive_IT(&huart2, &receive_tmp, 1);
 	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, receive_tmp, 32);
+	UARTLog("Send any request\n\r");
   /* Infinite loop */
 	for(;;)
 	{

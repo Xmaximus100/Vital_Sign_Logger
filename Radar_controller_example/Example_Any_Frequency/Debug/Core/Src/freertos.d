@@ -45,7 +45,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/AD7676/Inc/ad7676.h \
  C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/adf5355.h \
  C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/basic_example.h \
- ../Core/Inc/ring_buffer.h ../Core/Inc/parser.h
+ ../Core/Inc/ring_buffer.h ../Core/Inc/parser.h ../Core/Inc/utils.h
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
@@ -99,3 +99,4 @@ C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/V
 C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/basic_example.h:
 ../Core/Inc/ring_buffer.h:
 ../Core/Inc/parser.h:
+../Core/Inc/utils.h:

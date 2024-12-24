@@ -507,7 +507,7 @@ static int32_t adf5355_setup(struct adf5355_dev *dev)
 
 	dev->regs[ADF5355_REG(5)] = ADF5355_REG5_DEFAULT;
 
-	dev->regs[ADF5355_REG(7)] = ADF5355_REG7_LD_MODE_INT_N_EN(0) |
+	dev->regs[ADF5355_REG(7)] = ADF5355_REG7_LD_MODE_INT_N_EN(1) |
 				    ADF5355_REG7_FACT_N_LD_PRECISION(3) |
 				    ADF5355_REG7_LOL_MODE_EN(0) |
 				    ADF5355_REG7_LD_CYCLE_CNT(0) |

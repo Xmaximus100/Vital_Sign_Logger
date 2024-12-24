@@ -19,6 +19,14 @@ void UARTLog(char* message)
 	HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), 1000);
 }
 
+void* SetPLL_FF(void* fill_factor){
+
+}
+
+void* SetPLL_Period(void* period_ms){
+
+}
+
 void* LightLED(void* state){
 	static bool ret;
 	uint8_t* value = (uint8_t*)state;
@@ -36,5 +44,4 @@ void* LoadADF5355(void* arg){
 	int32_t response = adf5355_init(&dev, &hadf5355);
 	if (response == 0) ret = true;
 	return &ret;
-
 }
