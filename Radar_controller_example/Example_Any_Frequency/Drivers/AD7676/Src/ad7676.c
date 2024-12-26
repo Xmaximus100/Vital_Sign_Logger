@@ -7,6 +7,8 @@
 
 
 extern data_Collector_TypeDef* ad7676_data;
+bool collect_data = false;
+uint16_t awaited_samples = 0;
 
 
 void ad7676_init(data_Collector_TypeDef** ad7676_data)
@@ -21,20 +23,39 @@ void ad7676_init(data_Collector_TypeDef** ad7676_data)
 	*ad7676_data = init_data;
 }
 
-void ad7676_acquire_data(data_Collector_TypeDef* ad7676_data, int16_t sample)
-{
-	ad7676_data->data_buf[ad7676_data->data_ptr++] = sample;
+void ad7676_spi_read(uint8_t* buf, uint8_t size){
+	AD7676_CS_OFF;
+	HAL_SPI_Receive(ad7676_data->spi_desc, buf, 2, 0xFF);
+	AD7676_CS_ON;
 }
 
-void ad7676_read_one_sample()
+void ad7676_acquire_data(data_Collector_TypeDef* ad7676_data)
+{
+	uint8_t buf[2];
+	for(ad7676_data->current_channel=0; ad7676_data->current_channel<ad7676_data->num_channels; ad7676_data->current_channel++){
+		ad7676_spi_read(buf, 2);
+		ad7676_data->data_buf[ad7676_data->current_channel][ad7676_data->data_ptr] = (buf[0]+buf[1]<<8); //LSB first
+	}
+//	ad7676_data->data_buf[ad7676_data->data_ptr++] = sample;
+	ad7676_data->data_ptr = (ad7676_data->data_ptr++)%ad7676_data->data_ptr_max;
+
+}
+
+void ad7676_read_one_sample() //when BUSY goes down
 {
 
 //	(GPIOx->IDR & GPIO_Pin);
 //	GPIO_TypeDef GPIOB, D0_GPIO_Port, D15_GPIO_Port
 //	Pin PB3 reserved for SWD
-	int16_t sample = (GPIOB->IDR & AD7676_GPIOB_MASK) | ((GPIOC->IDR & AD7676_GPIOC_MASK) << 15);
-	ad7676_acquire_data(ad7676_data, sample);
+//	int16_t sample = (GPIOB->IDR & AD7676_GPIOB_MASK) | ((GPIOC->IDR & AD7676_GPIOC_MASK) << 15);
+	ad7676_acquire_data(ad7676_data);
 	AD7676_CNVST_ON;
+}
+
+void ad7676_read_samples(uint16_t samples){
+	for(uint16_t i=0; i<samples; i++){
+		__NOP();
+	}
 }
 
 void ad7676_reset_data(data_Collector_TypeDef* ad7676_data)

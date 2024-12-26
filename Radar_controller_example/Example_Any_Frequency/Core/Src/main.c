@@ -103,6 +103,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM6_Init();
   MX_SPI3_Init();
+  MX_SPI2_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();

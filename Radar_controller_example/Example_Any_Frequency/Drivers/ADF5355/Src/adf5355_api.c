@@ -17,12 +17,12 @@
 
 struct adf5355_init_param hadf5355;
 struct adf5355_dev* dev;
-static uint32_t freq_out = 12000;
-static uint32_t freq_in = 10;
+static uint16_t freq_out = 12000;
+static uint8_t freq_in = 10;
 static bool outb_en = true;
 static int8_t out_power = 3;
 static bool synced = false;
-static uint8_t mux_out = ADF5355_MUXOUT_DVDD;//ADF5355_MUXOUT_DIGITAL_LOCK_DETECT;//
+static enum adf5355_mux_out_sel mux_out = ADF5355_MUXOUT_DVDD;//ADF5355_MUXOUT_DIGITAL_LOCK_DETECT;//
 
 /******************************************************************************/
 /************************** Functions Implementation **************************/

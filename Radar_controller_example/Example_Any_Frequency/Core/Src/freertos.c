@@ -63,6 +63,7 @@ data_Collector_TypeDef* ad7676_data;
 RingBuffer buffer;
 uint8_t receive_tmp[32];
 uint8_t received_lines = 0;
+bool busy_dropped = false;
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -191,8 +192,24 @@ void StartADC(void *argument)
 	for(;;)
 	{
 	//	  UARTLog("Hello World\n\r");
-		osThreadFlagsWait(0x01, osFlagsWaitAll, osWaitForever);
-		ad7676_start_conversion();
+//		osThreadFlagsWait(0x01, osFlagsWaitAll, osWaitForever); //TODO prepare collect_data flag
+		if(collect_data){
+			if(busy_dropped){
+				ad7676_read_one_sample();
+				received_samples++;
+			}
+			if(received_samples<awaited_samples){
+				busy_dropped = false;
+				ad7676_start_conversion();
+			}
+			else{
+				UARTLog("Collected samples:%d\n\r", awaited_samples);
+//				for(uint16_t i=0; i<awaited_samples; i++){
+//					UARTLog("Collected samples:%d\n\r", awaited_samples);
+//				}
+			}
+		}
+
 	}
   /* USER CODE END StartADC */
 }
@@ -287,9 +304,9 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	if (GPIO_Pin == AD_BUSY_Pin){
-		ad7676_read_one_sample();
-		osThreadFlagsSet(adc_handlerHandle, 0x01);
+	if (GPIO_Pin == ADC_BUSY_Pin){
+//		osThreadFlagsSet(adc_handlerHandle, 0x01);
+		busy_dropped = true;
 	}
 }
 /* USER CODE END Application */
