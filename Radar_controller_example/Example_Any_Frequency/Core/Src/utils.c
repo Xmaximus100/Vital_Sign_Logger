@@ -9,23 +9,26 @@
 #include "string.h"
 #include "usart.h"
 #include "adf5355.h"
+#include "adf5355_api.h"
+#include "ad7676.h"
 #include "utils.h"
 
 extern struct adf5355_init_param hadf5355;
 extern struct adf5355_dev* dev;
+extern data_Collector_TypeDef* ad7676_data;
 
 void UARTLog(char* message)
 {
 	HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), 1000);
 }
 
-void* SetPLL_FF(void* fill_factor){
+//void* SetPLL_FF(void* fill_factor){
+//
+//}
 
-}
-
-void* SetPLL_Period(void* period_ms){
-
-}
+//void* SetPLL_Period(void* period_ms){
+//
+//}
 
 void* LightLED(void* state){
 	static bool ret;
@@ -43,5 +46,17 @@ void* LoadADF5355(void* arg){
 	static bool ret = false;
 	int32_t response = adf5355_init(&dev, &hadf5355);
 	if (response == 0) ret = true;
+	return &ret;
+}
+
+void* ReadADC(void* samples){
+	static bool ret;
+	uint16_t* value = (uint16_t*)samples;
+	if (*value <= 0 && *value > ad7676_data->data_ptr_max) ret = false;
+	else {
+		ad7676_read_samples(*value);
+		ad7676_start_conversion();
+		ret = true;
+	}
 	return &ret;
 }

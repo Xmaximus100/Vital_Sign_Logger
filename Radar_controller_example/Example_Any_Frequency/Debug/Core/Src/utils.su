@@ -1,5 +1,4 @@
-../Core/Src/utils.c:17:6:UARTLog	16	static
-../Core/Src/utils.c:22:7:SetPLL_FF	16	static
-../Core/Src/utils.c:26:7:SetPLL_Period	16	static
-../Core/Src/utils.c:30:7:LightLED	24	static
-../Core/Src/utils.c:41:7:LoadADF5355	24	static
+../Core/Src/utils.c:20:6:UARTLog	16	static
+../Core/Src/utils.c:33:7:LightLED	24	static
+../Core/Src/utils.c:44:7:LoadADF5355	24	static
+../Core/Src/utils.c:52:7:ReadADC	24	static

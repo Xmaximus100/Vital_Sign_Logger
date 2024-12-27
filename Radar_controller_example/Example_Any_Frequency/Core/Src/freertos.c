@@ -59,11 +59,15 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
-data_Collector_TypeDef* ad7676_data;
+extern data_Collector_TypeDef* ad7676_data;
 RingBuffer buffer;
 uint8_t receive_tmp[32];
 uint8_t received_lines = 0;
+uint16_t received_samples = 0;
 bool busy_dropped = false;
+extern uint16_t awaited_samples;
+extern bool collect_data;
+
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -76,8 +80,8 @@ const osThreadAttr_t defaultTask_attributes = {
 osThreadId_t adc_handlerHandle;
 const osThreadAttr_t adc_handler_attributes = {
   .name = "adc_handler",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityLow5,
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 /* Definitions for pll_handler */
 osThreadId_t pll_handlerHandle;
@@ -134,13 +138,13 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+//  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of adc_handler */
   adc_handlerHandle = osThreadNew(StartADC, NULL, &adc_handler_attributes);
 
   /* creation of pll_handler */
-  pll_handlerHandle = osThreadNew(StartPLL, NULL, &pll_handler_attributes);
+//  pll_handlerHandle = osThreadNew(StartPLL, NULL, &pll_handler_attributes);
 
   /* creation of at_cmds_handler */
   at_cmds_handlerHandle = osThreadNew(StartATCmds, NULL, &at_cmds_handler_attributes);
@@ -188,6 +192,7 @@ void StartDefaultTask(void *argument)
 void StartADC(void *argument)
 {
   /* USER CODE BEGIN StartADC */
+	ad7676_init(&ad7676_data);
   /* Infinite loop */
 	for(;;)
 	{
@@ -197,16 +202,26 @@ void StartADC(void *argument)
 			if(busy_dropped){
 				ad7676_read_one_sample();
 				received_samples++;
-			}
-			if(received_samples<awaited_samples){
-				busy_dropped = false;
-				ad7676_start_conversion();
-			}
-			else{
-				UARTLog("Collected samples:%d\n\r", awaited_samples);
-//				for(uint16_t i=0; i<awaited_samples; i++){
-//					UARTLog("Collected samples:%d\n\r", awaited_samples);
+				if(received_samples<awaited_samples){
+					ad7676_start_conversion();
+				}
+//				else if(received_samples == awaited_samples){
+//					char buffer[100];
+//					collect_data = false;
+//					received_samples = 0;
+//					sprintf(buffer, "Collected samples:%d\n\r", awaited_samples);
+//					UARTLog(buffer);
+//					for(uint16_t i=0; i<awaited_samples; i++){
+//						sprintf(buffer, "CHANNEL1 %.4f\tCHANNEL2 %.4f\tCHANNEL3 %.4f\tCHANNEL4 %.4f\t\n\r",
+//								ad7676_calculate_output(ad7676_data->data_buf[0][(ad7676_data->data_ptr-awaited_samples)%ad7676_data->data_ptr_max]),
+//								ad7676_calculate_output(ad7676_data->data_buf[1][(ad7676_data->data_ptr-awaited_samples)%ad7676_data->data_ptr_max]),
+//								ad7676_calculate_output(ad7676_data->data_buf[2][(ad7676_data->data_ptr-awaited_samples)%ad7676_data->data_ptr_max]),
+//								ad7676_calculate_output(ad7676_data->data_buf[3][(ad7676_data->data_ptr-awaited_samples)%ad7676_data->data_ptr_max])
+//								);
+//						UARTLog(buffer);
+//					}
 //				}
+				busy_dropped = false;
 			}
 		}
 
@@ -253,11 +268,13 @@ void StartATCmds(void *argument)
   /* Infinite loop */
 	for(;;)
 	{
+		osThreadFlagsWait(0x01, osFlagsNoClear, osWaitForever);
 		if(received_lines > 0){
 		  ParserTakeLine(&buffer, received_data);
 		  ParserParse((char*)received_data);
 		  received_lines--;
 		}
+		else osThreadFlagsClear(0x01);
 	}
   /* USER CODE END StartATCmds */
 }
@@ -271,6 +288,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 		if(RB_OK == WriteToBuffer(&buffer, receive_tmp, Size)){
 			if(receive_tmp[Size-1] == ENDLINE){
 				received_lines++;
+				osThreadFlagsSet(at_cmds_handlerHandle, 0x01);
 			}
 		}
 		else FlushBuffer(&buffer);
@@ -306,6 +324,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if (GPIO_Pin == ADC_BUSY_Pin){
 //		osThreadFlagsSet(adc_handlerHandle, 0x01);
+		if(busy_dropped == false)
 		busy_dropped = true;
 	}
 }

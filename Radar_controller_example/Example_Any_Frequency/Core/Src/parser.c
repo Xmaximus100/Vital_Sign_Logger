@@ -23,6 +23,7 @@ at_Commands_TypeDef at_cmds[] = {
 	{"EN", "EN set to %ld\n\r", "Type EN 0 or 1\n\r", ADF5355_Enable, 0},
 	{"RUN", "New configuration applied\n\r", "New configuration failed to apply\n\r", ADF5355_Run, 1},
 	{"SETUP", "Configuration succeed\n\r", "Configuration failed\n\r", LoadADF5355, 1},
+	{"READ", "ADC Read succees\n\r", "ADC Read failed\n\r", ReadADC, 0},
 };
 
 void ParserTakeLine(RingBuffer* buffer, uint8_t* destination){
@@ -44,7 +45,7 @@ void ParserParse(char* received_string){
 	char* endptr;
 	char* parse_pointer = strtok(received_string, "=");
 	int32_t value = strtol(strtok(NULL,","), &endptr, 10);
-	char buffer[70];
+	char buffer[90];
 	bool cmd_matched = false;
 	for (int i=0; i<sizeof(at_cmds)/sizeof(at_Commands_TypeDef); i++){
 		if(strcmp(at_cmds[i].command, parse_pointer) == 0){
@@ -59,7 +60,7 @@ void ParserParse(char* received_string){
 		}
 	}
 	if (!cmd_matched){
-		sprintf(buffer, "Available commands are LED, FREQOut, FREQIn, POW, EN, RUN and SETUP\n\r");
+		sprintf(buffer, "Available commands are LED, FREQOut, FREQIn, POW, EN, RUN, SETUP and READ\n\r");
 	}
 	UARTLog(buffer);
 }
