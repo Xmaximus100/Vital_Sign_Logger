@@ -27,13 +27,12 @@ void ad7676_init(data_Collector_TypeDef** ad7676_data)
 }
 
 void ad7676_spi_read(uint8_t* buf, uint8_t size){
-	AD7676_CS_OFF;
-	HAL_SPI_Receive(ad7676_data->spi_desc, buf, 2, 0xFF);
-	AD7676_CS_ON;
+	HAL_SPI_Receive(ad7676_data->spi_desc, buf, size, 0xFF);
 }
 
-float ad7676_calculate_output(uint16_t sample){
-	return sample/32768*10; //assuming range is +/-10V and REF is internal 2,5V datasheet p.23
+int ad7676_calculate_output(int32_t sample){
+	int sample_voltage = (sample*10*1000)/32768;
+	return sample_voltage;  //assuming range is +/-10V and REF is internal 2,5V datasheet p.23
 }
 
 void ad7676_read_one_sample() //when BUSY goes down
@@ -43,17 +42,18 @@ void ad7676_read_one_sample() //when BUSY goes down
 //	GPIO_TypeDef GPIOB, D0_GPIO_Port, D15_GPIO_Port
 //	Pin PB3 reserved for SWD
 //	int16_t sample = (GPIOB->IDR & AD7676_GPIOB_MASK) | ((GPIOC->IDR & AD7676_GPIOC_MASK) << 15);
-	uint8_t buf[2];
+	uint8_t buf[8];
+	AD7676_CS_OFF;
+	ad7676_spi_read(buf, 8);
 	for(ad7676_data->current_channel=0; ad7676_data->current_channel<ad7676_data->num_channels; ad7676_data->current_channel++){
-		ad7676_spi_read(buf, 2);
-		ad7676_data->data_buf[ad7676_data->current_channel][ad7676_data->data_ptr] = (buf[0]+buf[1]<<8); //LSB first
+		ad7676_data->data_buf[ad7676_data->current_channel][ad7676_data->data_ptr] = buf[2*ad7676_data->current_channel+1]+(buf[2*ad7676_data->current_channel]<<8); //LSB first
 	}
+	AD7676_CS_ON;
 //	ad7676_data->data_buf[ad7676_data->data_ptr++] = sample;
-	ad7676_data->data_ptr = (ad7676_data->data_ptr++)%ad7676_data->data_ptr_max;
+	ad7676_data->data_ptr = (ad7676_data->data_ptr+1)%ad7676_data->data_ptr_max;
 }
 
 void ad7676_read_samples(uint16_t samples){
-
 	awaited_samples = samples;
 	collect_data = true;
 }

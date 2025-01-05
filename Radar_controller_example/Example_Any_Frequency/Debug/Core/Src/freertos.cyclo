@@ -1,8 +1,8 @@
-../Core/Src/freertos.c:118:6:MX_FREERTOS_Init	1
-../Core/Src/freertos.c:169:6:StartDefaultTask	1
-../Core/Src/freertos.c:192:6:StartADC	4
-../Core/Src/freertos.c:239:6:StartPLL	1
-../Core/Src/freertos.c:261:6:StartATCmds	2
-../Core/Src/freertos.c:284:6:HAL_UARTEx_RxEventCallback	4
-../Core/Src/freertos.c:315:6:HAL_UART_TxCpltCallback	1
-../Core/Src/freertos.c:323:6:HAL_GPIO_EXTI_Callback	3
+../Core/Src/freertos.c:119:6:MX_FREERTOS_Init	1
+../Core/Src/freertos.c:170:6:StartDefaultTask	1
+../Core/Src/freertos.c:193:6:StartADC	6
+../Core/Src/freertos.c:246:6:StartPLL	1
+../Core/Src/freertos.c:268:6:StartATCmds	2
+../Core/Src/freertos.c:291:6:HAL_UARTEx_RxEventCallback	4
+../Core/Src/freertos.c:322:6:HAL_UART_TxCpltCallback	1
+../Core/Src/freertos.c:330:6:HAL_GPIO_EXTI_Callback	3

@@ -32,6 +32,7 @@
 #include "usart.h"
 #include "stdio.h"
 #include "string.h"
+#include "stdlib.h"
 #include "delay.h"
 #include "ad7676.h"
 #include "adf5355.h"
@@ -138,13 +139,13 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-//  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of adc_handler */
   adc_handlerHandle = osThreadNew(StartADC, NULL, &adc_handler_attributes);
 
   /* creation of pll_handler */
-//  pll_handlerHandle = osThreadNew(StartPLL, NULL, &pll_handler_attributes);
+  pll_handlerHandle = osThreadNew(StartPLL, NULL, &pll_handler_attributes);
 
   /* creation of at_cmds_handler */
   at_cmds_handlerHandle = osThreadNew(StartATCmds, NULL, &at_cmds_handler_attributes);
@@ -205,22 +206,28 @@ void StartADC(void *argument)
 				if(received_samples<awaited_samples){
 					ad7676_start_conversion();
 				}
-//				else if(received_samples == awaited_samples){
-//					char buffer[100];
-//					collect_data = false;
-//					received_samples = 0;
-//					sprintf(buffer, "Collected samples:%d\n\r", awaited_samples);
-//					UARTLog(buffer);
-//					for(uint16_t i=0; i<awaited_samples; i++){
-//						sprintf(buffer, "CHANNEL1 %.4f\tCHANNEL2 %.4f\tCHANNEL3 %.4f\tCHANNEL4 %.4f\t\n\r",
-//								ad7676_calculate_output(ad7676_data->data_buf[0][(ad7676_data->data_ptr-awaited_samples)%ad7676_data->data_ptr_max]),
-//								ad7676_calculate_output(ad7676_data->data_buf[1][(ad7676_data->data_ptr-awaited_samples)%ad7676_data->data_ptr_max]),
-//								ad7676_calculate_output(ad7676_data->data_buf[2][(ad7676_data->data_ptr-awaited_samples)%ad7676_data->data_ptr_max]),
-//								ad7676_calculate_output(ad7676_data->data_buf[3][(ad7676_data->data_ptr-awaited_samples)%ad7676_data->data_ptr_max])
-//								);
-//						UARTLog(buffer);
-//					}
-//				}
+				else if(received_samples == awaited_samples){
+					char buffer[64];
+					int v1, v2, v3, v4;
+					uint16_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
+					collect_data = false;
+					received_samples = 0;
+					sprintf(buffer, "Collected samples:%d\n\rCHANNEL1 CHANNEL2 CHANNEL3 CHANNEL4\n\r", awaited_samples);
+					UARTLog(buffer);
+					for(uint16_t i=0; i<awaited_samples; i++){
+						v1 = ad7676_calculate_output(ad7676_data->data_buf[0][(tmp_ptr + i)%ad7676_data->data_ptr_max]);
+						v2 = ad7676_calculate_output(ad7676_data->data_buf[1][(tmp_ptr + i)%ad7676_data->data_ptr_max]);
+						v3 = ad7676_calculate_output(ad7676_data->data_buf[2][(tmp_ptr + i)%ad7676_data->data_ptr_max]);
+						v4 = ad7676_calculate_output(ad7676_data->data_buf[3][(tmp_ptr + i)%ad7676_data->data_ptr_max]);
+						sprintf(buffer, "%d.%dV %d.%dV %d.%dV %d.%dV\n\r",
+								v1/1000,abs(v1%1000),
+								v2/1000,abs(v2%1000),
+								v3/1000,abs(v3%1000),
+								v4/1000,abs(v4%1000)
+								);
+						UARTLog(buffer);
+					}
+				}
 				busy_dropped = false;
 			}
 		}
