@@ -14,7 +14,6 @@
 #include "utils.h"
 
 extern struct adf5355_init_param hadf5355;
-extern struct adf5355_dev* dev;
 extern data_Collector_TypeDef* ad7676_data;
 
 void UARTLog(char* message)
@@ -38,14 +37,6 @@ void* LightLED(void* state){
 		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, *value);
 		ret = true;
 	}
-	return &ret;
-}
-
-void* LoadADF5355(void* arg){
-	ADF5355_Param_Init();
-	static bool ret = false;
-	int32_t response = adf5355_init(&dev, &hadf5355);
-	if (response == 0) ret = true;
 	return &ret;
 }
 

@@ -12,7 +12,6 @@ void UARTLog(char* message);
 //void* SetPLL_FF(void* fill_factor);
 //void* SetPLL_Period(void* period_ms);
 void* LightLED(void* state);
-void* LoadADF5355(void* arg);
 void* ReadADC(void* samples);
 
 #endif /* INC_UTILS_H_ */

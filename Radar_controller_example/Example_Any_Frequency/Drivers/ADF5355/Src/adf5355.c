@@ -318,10 +318,7 @@ int32_t adf5355_set_power(struct adf5355_dev *dev, bool en, uint8_t power){
 
 	dev->regs[ADF5355_REG(6)] = ADF5355_REG6_OUTPUT_PWR(power) |
 			ADF5355_REG6_RF_OUT_EN(en) |
-			(((dev->dev_id == ADF5355)
-			  || (dev->dev_id == ADF5356)) ? ADF5355_REG6_RF_OUTB_EN(!dev->outb_en) :
-			 ADF4355_REG6_OUTPUTB_PWR(dev->outb_power) |
-			 ADF4355_REG6_RF_OUTB_EN(dev->outb_en)) |
+			ADF4355_REG6_RF_OUTB_EN(dev->outb_en) |
 			ADF5355_REG6_MUTE_TILL_LOCK_EN(dev->mute_till_lock_en) |
 			ADF5355_REG6_CP_BLEED_CURR(cp_bleed) |
 			ADF5355_REG6_RF_DIV_SEL(dev->rf_div_sel) |
@@ -336,6 +333,13 @@ int32_t adf5355_set_power(struct adf5355_dev *dev, bool en, uint8_t power){
 			ADF5355_REG6_DEFAULT;
 
 	return adf5355_write(dev, ADF5355_REG(6), dev->regs[6]);
+}
+
+int32_t adf5355_set_muxout(struct adf5355_dev *dev, enum adf5355_mux_out_sel mux_out){
+
+	dev->regs[ADF5355_REG(4)] = (dev->regs[ADF5355_REG(4)] & ~ADF5355_REG4_MUXOUT(7)) | ADF5355_REG4_MUXOUT(mux_out);
+
+	return adf5355_write(dev, ADF5355_REG(4), dev->regs[4]);
 }
 
 /**
@@ -375,7 +379,7 @@ static int32_t adf5355_set_freq(struct adf5355_dev *dev,
 
 		dev->regs[ADF5355_REG(6)] = dev->regs[ADF5355_REG(6)] |
 					    ADF4355_REG6_RF_OUTB_EN(dev->outb_en) |
-					    ADF4355_REG6_OUTPUTB_PWR(dev->outb_power);
+					    ADF4355_REG6_OUTPUTB_PWR(dev->out_power);
 
 		while (freq < dev->min_vco_freq) {
 			freq <<= 1;
@@ -389,7 +393,7 @@ static int32_t adf5355_set_freq(struct adf5355_dev *dev,
 		dev->regs[ADF5355_REG(6)] = dev->regs[ADF5355_REG(6)] |
 					    ADF5355_REG6_RF_OUTB_EN(dev->outb_en);
 
-		freq >>= 1;
+		dev->freq_req >>= 1;
 	}
 
 	cp_bleed = adf5355_calc_reg0_to_2(dev, 1);
@@ -398,12 +402,9 @@ static int32_t adf5355_set_freq(struct adf5355_dev *dev,
 		dev->regs[ADF5355_REG(13)] = ADF5356_REG13_MOD2_MSB(dev->mod2 >> 14) |
 					     ADF5356_REG13_FRAC2_MSB(dev->fract2 >> 14);
 
-	dev->regs[ADF5355_REG(6)] = ADF5355_REG6_OUTPUT_PWR(dev->outa_power) |
+	dev->regs[ADF5355_REG(6)] = ADF5355_REG6_OUTPUT_PWR(dev->out_power) |
 				    ADF5355_REG6_RF_OUT_EN(dev->outa_en) |
-				    (((dev->dev_id == ADF5355)
-				      || (dev->dev_id == ADF5356)) ? ADF5355_REG6_RF_OUTB_EN(!dev->outb_en) :
-				     ADF4355_REG6_OUTPUTB_PWR(dev->outb_power) |
-				     ADF4355_REG6_RF_OUTB_EN(dev->outb_en)) |
+					ADF4355_REG6_RF_OUTB_EN(dev->outb_en) |
 				    ADF5355_REG6_MUTE_TILL_LOCK_EN(dev->mute_till_lock_en) |
 				    ADF5355_REG6_CP_BLEED_CURR(cp_bleed) |
 				    ADF5355_REG6_RF_DIV_SEL(dev->rf_div_sel) |
@@ -416,8 +417,6 @@ static int32_t adf5355_set_freq(struct adf5355_dev *dev,
 						    || (dev->dev_id == ADF5356)) ?
 						    dev->cp_bleed_current_polarity_en : 0) |
 				    ADF5355_REG6_DEFAULT;
-
-	dev->freq_req = freq;
 
 	return adf5355_reg_config(dev, dev->all_synced);
 }
@@ -510,7 +509,7 @@ static int32_t adf5355_setup(struct adf5355_dev *dev)
 	dev->regs[ADF5355_REG(7)] = ADF5355_REG7_LD_MODE_INT_N_EN(1) |
 				    ADF5355_REG7_FACT_N_LD_PRECISION(3) |
 				    ADF5355_REG7_LOL_MODE_EN(0) |
-				    ADF5355_REG7_LD_CYCLE_CNT(0) |
+				    ADF5355_REG7_LD_CYCLE_CNT(1) |
 				    ADF5355_REG7_LE_SYNCED_REFIN_EN(1) |
 				    ADF5356_REG7_LE_SYNCE_EDGE_RISING_EN(0) |
 				    (dev->dev_id == ADF5356) ? ADF5356_REG7_DEFAULT : ADF5355_REG7_DEFAULT;
@@ -584,8 +583,7 @@ int32_t adf5355_init(struct adf5355_dev **device,
 	dev->mute_till_lock_en = init_param->mute_till_lock_en;
 	dev->outa_en = init_param->outa_en;
 	dev->outb_en = init_param->outb_en;
-	dev->outa_power = init_param->outa_power;
-	dev->outb_power = init_param->outb_power;
+	dev->out_power = init_param->out_power;
 	dev->phase_detector_polarity_neg = init_param->phase_detector_polarity_neg;
 	dev->ref_diff_en = init_param->ref_diff_en;
 	dev->mux_out_3v3_en = init_param->mux_out_3v3_en;
@@ -593,7 +591,7 @@ int32_t adf5355_init(struct adf5355_dev **device,
 	dev->ref_div2_en = init_param->ref_div2_en;
 	dev->mux_out_sel = init_param->mux_out_sel;
 	dev->outb_sel_fund = init_param->outb_sel_fund;
-	dev->num_channels = 2;
+	dev->num_channels = 1;
 
 	if (dev->clkin_freq > 75000000) dev->ref_div2_en = true;
 

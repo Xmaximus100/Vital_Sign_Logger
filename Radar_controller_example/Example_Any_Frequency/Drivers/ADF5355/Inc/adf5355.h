@@ -80,7 +80,7 @@
 
 /* REG6 Bit Definitions */
 #define ADF4355_REG6_OUTPUTB_PWR(x)		        (((x) & 0x3) << 7)
-#define ADF4355_REG6_RF_OUTB_EN(x)		        ((x) << 9)
+#define ADF4355_REG6_RF_OUTB_EN(x)		        ((!x) << 9)
 #define ADF4356_REG6_RF_OUTB_SEL(x)                ((x) << 25)
 #define ADF5355_REG6_OUTPUT_PWR(x)		        (((x) & 0x3) << 4)
 #define ADF5355_REG6_RF_OUT_EN(x)		        ((x) << 6)
@@ -246,8 +246,7 @@ struct adf5355_dev {
 	bool		                mute_till_lock_en;
 	bool                        outa_en;
 	bool                        outb_en;
-	uint8_t                     outa_power;
-	uint8_t                     outb_power;
+	uint8_t                     out_power;
 	uint8_t                     phase_detector_polarity_neg;
 	bool                        ref_diff_en;
 	bool                        mux_out_3v3_en;
@@ -277,8 +276,7 @@ struct adf5355_init_param {
 	bool		                mute_till_lock_en;
 	bool                        outa_en;
 	bool                        outb_en;
-	uint8_t                     outa_power;
-	uint8_t                     outb_power;
+	uint8_t                     out_power;
 	bool                        phase_detector_polarity_neg;
 	bool                        ref_diff_en;
 	bool                        mux_out_3v3_en;
@@ -294,6 +292,9 @@ int32_t adf5355_change_freq(struct adf5355_dev *dev, uint64_t freq);
 
 /* Change state and power on going */
 int32_t adf5355_set_power(struct adf5355_dev *dev, bool en, uint8_t power);
+
+/* Change mux out function on going */
+int32_t adf5355_set_muxout(struct adf5355_dev *dev, enum adf5355_mux_out_sel mux_out);
 
 /* Recalculate rate corresponding to a channel. */
 int32_t adf5355_clk_recalc_rate(struct adf5355_dev *dev, uint32_t chan,

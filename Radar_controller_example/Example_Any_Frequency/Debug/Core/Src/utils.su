@@ -1,4 +1,3 @@
-../Core/Src/utils.c:20:6:UARTLog	16	static
-../Core/Src/utils.c:33:7:LightLED	24	static
-../Core/Src/utils.c:44:7:LoadADF5355	24	static
-../Core/Src/utils.c:52:7:ReadADC	24	static
+../Core/Src/utils.c:19:6:UARTLog	16	static
+../Core/Src/utils.c:32:7:LightLED	24	static
+../Core/Src/utils.c:43:7:ReadADC	24	static
