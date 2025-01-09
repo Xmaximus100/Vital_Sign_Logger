@@ -125,6 +125,8 @@ static void adf5355_pll_fract_n_compute(uint64_t vco,
 	gcd_div = no_os_greatest_common_divisor(*fract2, *mod2);
 	*mod2 /= gcd_div;
 	*fract2 /= gcd_div;
+
+	if (*mod2 < 2) *mod2 = 2;
 }
 
 /*Private static functions*/

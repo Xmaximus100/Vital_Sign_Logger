@@ -115,7 +115,7 @@ void ADF5355_Param_Init(void){
 	hadf5355.outa_en = false;  // Flaga aktywacji wyjścia A
 	hadf5355.outb_en = outb_en;  // Flaga aktywacji wyjścia B
 	hadf5355.out_power = out_power;  // Moc wyjścia B
-	hadf5355.phase_detector_polarity_neg = true;  // Flaga aktywacji negatywnej polaryzacji detektora fazy
+	hadf5355.phase_detector_polarity_neg = false;  // Flaga aktywacji negatywnej polaryzacji detektora fazy
 	hadf5355.ref_diff_en = false;  // Flaga aktywacji różnicowego wejścia referencyjnego
 	hadf5355.mux_out_3v3_en = true;  // Flaga aktywacji wyjścia mux na 3,3V
 	hadf5355.ref_doubler_en = false;  // Flaga aktywacji podwajacza częstotliwości referencyjnej
