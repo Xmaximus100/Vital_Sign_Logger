@@ -66,6 +66,8 @@ uint8_t receive_tmp[32];
 uint8_t received_lines = 0;
 uint16_t received_samples = 0;
 bool busy_dropped = false;
+uint64_t end_time, elapsed_time, read_time = 0;
+extern uint64_t start_time;
 extern uint16_t awaited_samples;
 extern bool collect_data;
 extern bool continuous_mode;
@@ -195,6 +197,7 @@ void StartADC(void *argument)
 {
   /* USER CODE BEGIN StartADC */
 	ad7676_init(&ad7676_data);
+	HAL_TIM_Base_Start(&htim2);
   /* Infinite loop */
 	for(;;)
 	{
@@ -202,13 +205,20 @@ void StartADC(void *argument)
 //		osThreadFlagsWait(0x01, osFlagsWaitAll, osWaitForever); //TODO prepare collect_data flag
 		if(collect_data || continuous_mode){
 			if(busy_dropped){
-				ad7676_read_one_sample();
+				ad7676_read_one_sample(&read_time);
 				received_samples++;
 				if(received_samples<awaited_samples){
 					ad7676_start_conversion();
 				}
 				else if(received_samples == awaited_samples){
+					end_time = __HAL_TIM_GET_COUNTER(&htim2);
+					elapsed_time = end_time - start_time;
+					uint32_t base_freq = 80000000;
+					char buffer[50];
 					ad7676_display_samples(awaited_samples, &received_samples, UARTLog);
+					sprintf(buffer, "ADC Read Freq: %.3f, ADC Collect Freq: %.3f", (float)(base_freq/read_time),
+							(float)(base_freq*awaited_samples/elapsed_time));
+					UARTLog(buffer);
 				}
 				busy_dropped = false;
 			}

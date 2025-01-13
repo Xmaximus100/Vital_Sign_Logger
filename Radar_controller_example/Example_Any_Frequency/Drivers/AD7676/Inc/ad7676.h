@@ -38,7 +38,7 @@ void ad7676_read_continuous(bool enable);
 
 void ad7676_display_samples(uint16_t awaited_samples, uint16_t* received_samples, void (*displayFunction)(char* message));
 
-void ad7676_read_one_sample(void);
+void ad7676_read_one_sample(uint64_t* timer);
 
 void ad7676_start_conversion(void);
 

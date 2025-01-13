@@ -31,7 +31,8 @@ Drivers/AD7676/Src/ad7676.o: ../Drivers/AD7676/Src/ad7676.c \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart_ex.h \
  C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/No_OS/Inc/no_os_alloc.h \
- ../Core/Inc/spi.h ../Core/Inc/main.h ../Core/Inc/main.h
+ ../Core/Inc/spi.h ../Core/Inc/main.h ../Core/Inc/main.h \
+ ../Core/Inc/tim.h
 C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/AD7676/Inc/ad7676.h:
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h:
 ../Core/Inc/stm32l4xx_hal_conf.h:
@@ -67,3 +68,4 @@ C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/V
 ../Core/Inc/spi.h:
 ../Core/Inc/main.h:
 ../Core/Inc/main.h:
+../Core/Inc/tim.h:

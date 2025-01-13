@@ -12,9 +12,11 @@
 #include "adf5355_api.h"
 #include "ad7676.h"
 #include "utils.h"
+#include "tim.h"
 
 extern struct adf5355_init_param hadf5355;
 extern data_Collector_TypeDef* ad7676_data;
+uint64_t start_time = 0;
 
 void UARTLog(char* message)
 {
@@ -46,6 +48,7 @@ void* ReadADC(void* samples){
 	if (*value <= 0 && *value > ad7676_data->data_ptr_max) ret = false;
 	else {
 		ad7676_read_samples(*value);
+		start_time = __HAL_TIM_GET_COUNTER(&htim2);
 		ad7676_start_conversion();
 		ret = true;
 	}

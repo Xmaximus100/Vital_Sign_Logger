@@ -33,7 +33,7 @@ Core/Src/utils.o: ../Core/Src/utils.c ../Core/Inc/main.h \
  C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/adf5355.h \
  C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/adf5355_api.h \
  C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/AD7676/Inc/ad7676.h \
- ../Core/Inc/utils.h
+ ../Core/Inc/utils.h ../Core/Inc/tim.h
 ../Core/Inc/main.h:
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h:
 ../Core/Inc/stm32l4xx_hal_conf.h:
@@ -71,3 +71,4 @@ C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/V
 C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/ADF5355/Inc/adf5355_api.h:
 C:/Users/patryk.celebanski/Documents/Studia/Masters\ Dissertation/STM32Project/Vital_Sign_Logger/Radar_controller_example/Example_Any_Frequency/Drivers/AD7676/Inc/ad7676.h:
 ../Core/Inc/utils.h:
+../Core/Inc/tim.h:

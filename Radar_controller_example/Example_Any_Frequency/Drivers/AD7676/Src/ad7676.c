@@ -4,6 +4,7 @@
 #include "no_os_alloc.h"
 #include "spi.h"
 #include "main.h"
+#include "tim.h"
 #include <string.h>
 
 
@@ -11,6 +12,7 @@ data_Collector_TypeDef* ad7676_data;
 bool collect_data = false;
 bool continuous_mode = false;
 uint16_t awaited_samples = 0;
+static uint64_t start_time, end_time, elapsed_time = 0;
 
 
 void ad7676_init(data_Collector_TypeDef** ad7676_data)
@@ -38,13 +40,14 @@ int ad7676_calculate_output(int32_t sample){
 	return sample_voltage;  //assuming range is +/-10V and REF is internal 2,5V datasheet p.23
 }
 
-void ad7676_read_one_sample() //when BUSY goes down
+void ad7676_read_one_sample(uint64_t* timer) //when BUSY goes down
 {
 
 //	(GPIOx->IDR & GPIO_Pin);
 //	GPIO_TypeDef GPIOB, D0_GPIO_Port, D15_GPIO_Port
 //	Pin PB3 reserved for SWD
 //	int16_t sample = (GPIOB->IDR & AD7676_GPIOB_MASK) | ((GPIOC->IDR & AD7676_GPIOC_MASK) << 15);
+	start_time = __HAL_TIM_GET_COUNTER(&htim2);
 	uint16_t buf[4];
 	AD7676_CS_OFF;
 	ad7676_spi_read(buf, 4);
@@ -57,6 +60,9 @@ void ad7676_read_one_sample() //when BUSY goes down
 	AD7676_CS_ON;
 //	ad7676_data->data_buf[ad7676_data->data_ptr++] = sample;
 	ad7676_data->data_ptr = (ad7676_data->data_ptr+1)%ad7676_data->data_ptr_max;
+	end_time = __HAL_TIM_GET_COUNTER(&htim2);
+	elapsed_time = end_time - start_time;
+	*timer = elapsed_time;
 }
 
 void ad7676_read_samples(uint16_t samples){
