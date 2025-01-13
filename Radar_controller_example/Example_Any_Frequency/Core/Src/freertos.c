@@ -68,6 +68,7 @@ uint16_t received_samples = 0;
 bool busy_dropped = false;
 extern uint16_t awaited_samples;
 extern bool collect_data;
+extern bool continuous_mode;
 
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
@@ -199,7 +200,7 @@ void StartADC(void *argument)
 	{
 	//	  UARTLog("Hello World\n\r");
 //		osThreadFlagsWait(0x01, osFlagsWaitAll, osWaitForever); //TODO prepare collect_data flag
-		if(collect_data){
+		if(collect_data || continuous_mode){
 			if(busy_dropped){
 				ad7676_read_one_sample();
 				received_samples++;
@@ -207,26 +208,7 @@ void StartADC(void *argument)
 					ad7676_start_conversion();
 				}
 				else if(received_samples == awaited_samples){
-					char buffer[64];
-					int v1, v2, v3, v4;
-					uint16_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
-					collect_data = false;
-					received_samples = 0;
-					sprintf(buffer, "Collected samples:%d\n\rCHANNEL1 CHANNEL2 CHANNEL3 CHANNEL4\n\r", awaited_samples);
-					UARTLog(buffer);
-					for(uint16_t i=0; i<awaited_samples; i++){
-						v1 = ad7676_calculate_output(ad7676_data->data_buf[0][(tmp_ptr + i)%ad7676_data->data_ptr_max]);
-						v2 = ad7676_calculate_output(ad7676_data->data_buf[1][(tmp_ptr + i)%ad7676_data->data_ptr_max]);
-						v3 = ad7676_calculate_output(ad7676_data->data_buf[2][(tmp_ptr + i)%ad7676_data->data_ptr_max]);
-						v4 = ad7676_calculate_output(ad7676_data->data_buf[3][(tmp_ptr + i)%ad7676_data->data_ptr_max]);
-						sprintf(buffer, "%d.%dV %d.%dV %d.%dV %d.%dV\n\r",
-								v1/1000,abs(v1%1000),
-								v2/1000,abs(v2%1000),
-								v3/1000,abs(v3%1000),
-								v4/1000,abs(v4%1000)
-								);
-						UARTLog(buffer);
-					}
+					ad7676_display_samples(awaited_samples, &received_samples, UARTLog);
 				}
 				busy_dropped = false;
 			}

@@ -12,9 +12,14 @@
 #include <stdbool.h>
 #include "stm32l4xx_hal.h"
 
+typedef union __data_Buffer {
+	uint64_t data;
+	uint16_t channels[4];
+} dataBuffer;
+
 typedef struct __data_Collector {
 	SPI_HandleTypeDef* spi_desc;
-	uint16_t data_buf[4][200];
+	dataBuffer data_buf[200];
 	uint16_t data_ptr;
 	uint16_t data_ptr_max;
 	uint8_t current_channel;
@@ -23,11 +28,15 @@ typedef struct __data_Collector {
 
 void ad7676_init(data_Collector_TypeDef** ad7676_data);
 
-void ad7676_spi_read(uint8_t* buf, uint8_t size);
+void ad7676_spi_read(uint16_t* buf, uint8_t size);
 
 int ad7676_calculate_output(int32_t sample);
 
 void ad7676_read_samples(uint16_t samples);
+
+void ad7676_read_continuous(bool enable);
+
+void ad7676_display_samples(uint16_t awaited_samples, uint16_t* received_samples, void (*displayFunction)(char* message));
 
 void ad7676_read_one_sample(void);
 

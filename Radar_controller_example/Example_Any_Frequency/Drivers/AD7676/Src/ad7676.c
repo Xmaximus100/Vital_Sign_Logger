@@ -4,10 +4,12 @@
 #include "no_os_alloc.h"
 #include "spi.h"
 #include "main.h"
+#include <string.h>
 
 
 data_Collector_TypeDef* ad7676_data;
 bool collect_data = false;
+bool continuous_mode = false;
 uint16_t awaited_samples = 0;
 
 
@@ -26,8 +28,9 @@ void ad7676_init(data_Collector_TypeDef** ad7676_data)
 	*ad7676_data = init_data;
 }
 
-void ad7676_spi_read(uint8_t* buf, uint8_t size){
-	HAL_SPI_Receive(ad7676_data->spi_desc, buf, size, 0xFF);
+void ad7676_spi_read(uint16_t* buf, uint8_t size){
+	HAL_SPI_Receive(ad7676_data->spi_desc, (uint8_t*)buf, size, 0xFF);
+//	HAL_SPI_Receive_DMA(ad7676_data->spi_desc, (uint8_t*)buf, size);
 }
 
 int ad7676_calculate_output(int32_t sample){
@@ -42,12 +45,15 @@ void ad7676_read_one_sample() //when BUSY goes down
 //	GPIO_TypeDef GPIOB, D0_GPIO_Port, D15_GPIO_Port
 //	Pin PB3 reserved for SWD
 //	int16_t sample = (GPIOB->IDR & AD7676_GPIOB_MASK) | ((GPIOC->IDR & AD7676_GPIOC_MASK) << 15);
-	uint8_t buf[8];
+	uint16_t buf[4];
 	AD7676_CS_OFF;
-	ad7676_spi_read(buf, 8);
-	for(ad7676_data->current_channel=0; ad7676_data->current_channel<ad7676_data->num_channels; ad7676_data->current_channel++){
-		ad7676_data->data_buf[ad7676_data->current_channel][ad7676_data->data_ptr] = buf[2*ad7676_data->current_channel+1]+(buf[2*ad7676_data->current_channel]<<8); //LSB first
-	}
+	ad7676_spi_read(buf, 4);
+//	for(ad7676_data->current_channel=0; ad7676_data->current_channel<ad7676_data->num_channels; ad7676_data->current_channel++){
+//		//ad7676_data->data_buf[ad7676_data->current_channel][ad7676_data->data_ptr] = buf[2*ad7676_data->current_channel+1]+(buf[2*ad7676_data->current_channel]<<8); //MSB first
+//		ad7676_data->data_buf[ad7676_data->data_ptr] = buf[ad7676_data->current_channel]; //MSB first
+//	}
+	memcpy(&ad7676_data->data_buf[ad7676_data->data_ptr].data, buf, 8);
+//	ad7676_data->data_buf[ad7676_data->data_ptr].data = (uint64_t)buf[0]<<48 + (uint64_t)buf[1]<<32 + (uint64_t)buf[2]<<16 + (uint64_t)buf[3];
 	AD7676_CS_ON;
 //	ad7676_data->data_buf[ad7676_data->data_ptr++] = sample;
 	ad7676_data->data_ptr = (ad7676_data->data_ptr+1)%ad7676_data->data_ptr_max;
@@ -58,11 +64,39 @@ void ad7676_read_samples(uint16_t samples){
 	collect_data = true;
 }
 
+void ad7676_read_continuous(bool enable){
+	continuous_mode = enable;
+}
+
+void ad7676_display_samples(uint16_t awaited_samples, uint16_t* received_samples, void (*displayFunction)(char* message)){
+	char buffer[64];
+	int v1, v2, v3, v4;
+	uint16_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
+	collect_data = false;
+	*received_samples = 0;
+	sprintf(buffer, "Collected samples:%d\n\rCHANNEL1 CHANNEL2 CHANNEL3 CHANNEL4\n\r", awaited_samples);
+	displayFunction(buffer);
+	for(uint16_t i=0; i<awaited_samples; i++){
+		v1 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max].channels[0]);
+		v2 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max].channels[1]);
+		v3 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max].channels[2]);
+		v4 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max].channels[3]);
+		sprintf(buffer, "%d.%dV %d.%dV %d.%dV %d.%dV\n\r",
+				v1/1000,abs(v1%1000),
+				v2/1000,abs(v2%1000),
+				v3/1000,abs(v3%1000),
+				v4/1000,abs(v4%1000)
+				);
+		displayFunction(buffer);
+	}
+}
+
 void ad7676_reset_data(data_Collector_TypeDef* ad7676_data)
 {
 	for(ad7676_data->current_channel=0; ad7676_data->current_channel<ad7676_data->num_channels; ad7676_data->current_channel++){
 		for (uint32_t i=0; i<=ad7676_data->data_ptr_max; i++){
-			ad7676_data->data_buf[ad7676_data->current_channel][i] = 0;
+//			ad7676_data->data_buf[ad7676_data->current_channel][i] = 0;
+			ad7676_data->data_buf[i].data = 0;
 		}
 	}
 	ad7676_data->data_ptr = 0;
