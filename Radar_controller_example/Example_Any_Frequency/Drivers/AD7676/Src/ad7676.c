@@ -48,16 +48,17 @@ void ad7676_read_one_sample(uint64_t* timer) //when BUSY goes down
 //	Pin PB3 reserved for SWD
 //	int16_t sample = (GPIOB->IDR & AD7676_GPIOB_MASK) | ((GPIOC->IDR & AD7676_GPIOC_MASK) << 15);
 	start_time = __HAL_TIM_GET_COUNTER(&htim2);
-	uint16_t buf[4];
+//	uint16_t buf[4];
 	AD7676_CS_OFF;
-	ad7676_spi_read(buf, 4);
+//	ad7676_spi_read(&ad7676_data->data_buf[ad7676_data->data_ptr].data, 4);
+	HAL_SPI_Receive_IT(ad7676_data->spi_desc, (uint8_t*)&ad7676_data->data_buf[ad7676_data->data_ptr], 4);
 //	for(ad7676_data->current_channel=0; ad7676_data->current_channel<ad7676_data->num_channels; ad7676_data->current_channel++){
 //		//ad7676_data->data_buf[ad7676_data->current_channel][ad7676_data->data_ptr] = buf[2*ad7676_data->current_channel+1]+(buf[2*ad7676_data->current_channel]<<8); //MSB first
 //		ad7676_data->data_buf[ad7676_data->data_ptr] = buf[ad7676_data->current_channel]; //MSB first
 //	}
-	memcpy(&ad7676_data->data_buf[ad7676_data->data_ptr].data, buf, 8);
+//	memcpy(&ad7676_data->data_buf[ad7676_data->data_ptr].data, buf, 8);
 //	ad7676_data->data_buf[ad7676_data->data_ptr].data = (uint64_t)buf[0]<<48 + (uint64_t)buf[1]<<32 + (uint64_t)buf[2]<<16 + (uint64_t)buf[3];
-	AD7676_CS_ON;
+//	AD7676_CS_ON;
 //	ad7676_data->data_buf[ad7676_data->data_ptr++] = sample;
 	ad7676_data->data_ptr = (ad7676_data->data_ptr+1)%ad7676_data->data_ptr_max;
 	end_time = __HAL_TIM_GET_COUNTER(&htim2);
@@ -83,10 +84,10 @@ void ad7676_display_samples(uint16_t awaited_samples, uint16_t* received_samples
 	sprintf(buffer, "Collected samples:%d\n\rCHANNEL1 CHANNEL2 CHANNEL3 CHANNEL4\n\r", awaited_samples);
 	displayFunction(buffer);
 	for(uint16_t i=0; i<awaited_samples; i++){
-		v1 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max].channels[0]);
-		v2 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max].channels[1]);
-		v3 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max].channels[2]);
-		v4 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max].channels[3]);
+		v1 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][0]);
+		v2 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][1]);
+		v3 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][2]);
+		v4 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][3]);
 		sprintf(buffer, "%d.%dV %d.%dV %d.%dV %d.%dV\n\r",
 				v1/1000,abs(v1%1000),
 				v2/1000,abs(v2%1000),
@@ -102,7 +103,7 @@ void ad7676_reset_data(data_Collector_TypeDef* ad7676_data)
 	for(ad7676_data->current_channel=0; ad7676_data->current_channel<ad7676_data->num_channels; ad7676_data->current_channel++){
 		for (uint32_t i=0; i<=ad7676_data->data_ptr_max; i++){
 //			ad7676_data->data_buf[ad7676_data->current_channel][i] = 0;
-			ad7676_data->data_buf[i].data = 0;
+			ad7676_data->data_buf[i][ad7676_data->current_channel] = 0;
 		}
 	}
 	ad7676_data->data_ptr = 0;
