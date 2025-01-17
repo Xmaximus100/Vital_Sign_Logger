@@ -5,6 +5,7 @@
 #include "spi.h"
 #include "main.h"
 #include "tim.h"
+#include "stm32l4xx_hal.h"
 #include <string.h>
 
 
@@ -30,9 +31,71 @@ void ad7676_init(data_Collector_TypeDef** ad7676_data)
 	*ad7676_data = init_data;
 }
 
-void ad7676_spi_read(uint16_t* buf, uint8_t size){
-	HAL_SPI_Receive(ad7676_data->spi_desc, (uint8_t*)buf, size, 0xFF);
+void ad7676_spi_read(uint8_t* buf, uint8_t size){
+//	HAL_SPI_Receive(ad7676_data->spi_desc, (uint8_t*)buf, size, 0xFF);
 //	HAL_SPI_Receive_DMA(ad7676_data->spi_desc, (uint8_t*)buf, size);
+	/* Process Locked */
+	__HAL_LOCK(ad7676_data->spi_desc);
+
+	/* Set the transaction information */
+	ad7676_data->spi_desc->State       = HAL_SPI_STATE_BUSY_RX;
+	ad7676_data->spi_desc->ErrorCode   = HAL_SPI_ERROR_NONE;
+	ad7676_data->spi_desc->pRxBuffPtr  = buf;
+	ad7676_data->spi_desc->RxXferSize  = size;
+	ad7676_data->spi_desc->RxXferCount = size;
+
+	/*Init field not used in handle to zero */
+	ad7676_data->spi_desc->RxISR       = NULL;
+	ad7676_data->spi_desc->TxISR       = NULL;
+	ad7676_data->spi_desc->TxXferSize  = 0U;
+	ad7676_data->spi_desc->TxXferCount = 0U;
+
+	CLEAR_BIT(ad7676_data->spi_desc->Instance->CR2, SPI_CR2_LDMARX);
+	if (ad7676_data->spi_desc->Init.DataSize > SPI_DATASIZE_8BIT)
+	{
+	/* Set RX Fifo threshold according the reception data length: 16bit */
+	CLEAR_BIT(ad7676_data->spi_desc->Instance->CR2, SPI_RXFIFO_THRESHOLD);
+	}
+	/* Set the SPI RxDMA Half transfer complete callback */
+//	ad7676_data->spi_desc->hdmarx->XferHalfCpltCallback = SPI_DMAHalfReceiveCplt;
+
+	/* Set the SPI Rx DMA transfer complete callback */
+	ad7676_data->spi_desc->hdmarx->XferCpltCallback = HAL_SPI_RxCpltCallback(ad7676_data->spi_desc); //TODO Finish it HAL uses SPI_DMAReceiveCplt
+
+	/* Set the DMA error callback */
+//	ad7676_data->spi_desc->hdmarx->XferErrorCallback = SPI_DMAError;
+
+	/* Set the DMA AbortCpltCallback */
+//	ad7676_data->spi_desc->hdmarx->XferAbortCallback = NULL;
+
+	/* Enable the Rx DMA Stream/Channel  */
+	if (HAL_OK != HAL_DMA_Start_IT(ad7676_data->spi_desc->hdmarx, (uint32_t)&ad7676_data->spi_desc->Instance->DR, (uint32_t)ad7676_data->spi_desc->pRxBuffPtr,
+			ad7676_data->spi_desc->RxXferCount))
+	{
+	/* Update SPI error code */
+	SET_BIT(ad7676_data->spi_desc->ErrorCode, HAL_SPI_ERROR_DMA);
+	/* Process Unlocked */
+	__HAL_UNLOCK(ad7676_data->spi_desc);
+//	return HAL_ERROR;
+	}
+
+	/* Check if the SPI is already enabled */
+	if ((ad7676_data->spi_desc->Instance->CR1 & SPI_CR1_SPE) != SPI_CR1_SPE)
+	{
+	/* Enable SPI peripheral */
+	__HAL_SPI_ENABLE(ad7676_data->spi_desc);
+	}
+
+	/* Process Unlocked */
+	__HAL_UNLOCK(ad7676_data->spi_desc);
+
+	/* Enable the SPI Error Interrupt Bit */
+	__HAL_SPI_ENABLE_IT(ad7676_data->spi_desc, (SPI_IT_ERR));
+
+	/* Enable Rx DMA Request */
+	SET_BIT(ad7676_data->spi_desc->Instance->CR2, SPI_CR2_RXDMAEN);
+
+//	return HAL_OK;
 }
 
 int ad7676_calculate_output(int32_t sample){
@@ -47,11 +110,14 @@ void ad7676_read_one_sample(uint64_t* timer) //when BUSY goes down
 //	GPIO_TypeDef GPIOB, D0_GPIO_Port, D15_GPIO_Port
 //	Pin PB3 reserved for SWD
 //	int16_t sample = (GPIOB->IDR & AD7676_GPIOB_MASK) | ((GPIOC->IDR & AD7676_GPIOC_MASK) << 15);
-	start_time = __HAL_TIM_GET_COUNTER(&htim2);
+//	start_time = __HAL_TIM_GET_COUNTER(&htim2);
 //	uint16_t buf[4];
 	AD7676_CS_OFF;
-//	ad7676_spi_read(&ad7676_data->data_buf[ad7676_data->data_ptr].data, 4);
-	HAL_SPI_Receive_IT(ad7676_data->spi_desc, (uint8_t*)&ad7676_data->data_buf[ad7676_data->data_ptr], 4);
+	ad7676_spi_read(&ad7676_data->data_buf[ad7676_data->data_ptr], 4);
+
+	HAL_SPI_Receive_DMA(ad7676_data->spi_desc, (uint8_t*)&ad7676_data->data_buf[ad7676_data->data_ptr], 4);
+
+//	HAL_SPI_Receive_IT(ad7676_data->spi_desc, (uint8_t*)&ad7676_data->data_buf[ad7676_data->data_ptr], 4);
 //	for(ad7676_data->current_channel=0; ad7676_data->current_channel<ad7676_data->num_channels; ad7676_data->current_channel++){
 //		//ad7676_data->data_buf[ad7676_data->current_channel][ad7676_data->data_ptr] = buf[2*ad7676_data->current_channel+1]+(buf[2*ad7676_data->current_channel]<<8); //MSB first
 //		ad7676_data->data_buf[ad7676_data->data_ptr] = buf[ad7676_data->current_channel]; //MSB first
@@ -61,9 +127,9 @@ void ad7676_read_one_sample(uint64_t* timer) //when BUSY goes down
 //	AD7676_CS_ON;
 //	ad7676_data->data_buf[ad7676_data->data_ptr++] = sample;
 	ad7676_data->data_ptr = (ad7676_data->data_ptr+1)%ad7676_data->data_ptr_max;
-	end_time = __HAL_TIM_GET_COUNTER(&htim2);
-	elapsed_time = end_time - start_time;
-	*timer = elapsed_time;
+//	end_time = __HAL_TIM_GET_COUNTER(&htim2);
+//	elapsed_time = end_time - start_time;
+//	*timer = elapsed_time;
 }
 
 void ad7676_read_samples(uint16_t samples){

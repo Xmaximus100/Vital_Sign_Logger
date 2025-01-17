@@ -1,9 +1,0 @@
-../Drivers/AD7676/Src/ad7676.c:18:6:ad7676_init	1
-../Drivers/AD7676/Src/ad7676.c:33:6:ad7676_spi_read	1
-../Drivers/AD7676/Src/ad7676.c:38:5:ad7676_calculate_output	2
-../Drivers/AD7676/Src/ad7676.c:43:6:ad7676_read_one_sample	1
-../Drivers/AD7676/Src/ad7676.c:69:6:ad7676_read_samples	1
-../Drivers/AD7676/Src/ad7676.c:74:6:ad7676_read_continuous	1
-../Drivers/AD7676/Src/ad7676.c:78:6:ad7676_display_samples	2
-../Drivers/AD7676/Src/ad7676.c:101:6:ad7676_reset_data	3
-../Drivers/AD7676/Src/ad7676.c:112:6:ad7676_start_conversion	2

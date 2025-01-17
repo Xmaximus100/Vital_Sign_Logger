@@ -202,7 +202,7 @@ void StartADC(void *argument)
 	for(;;)
 	{
 	//	  UARTLog("Hello World\n\r");
-		osThreadFlagsWait(awaited_samples, osFlagsNoClear | osFlagsWaitAll, osWaitForever); //TODO prepare collect_data flag
+		osThreadFlagsWait(awaited_samples, osFlagsWaitAll, osWaitForever); //TODO prepare collect_data flag
 		end_time = __HAL_TIM_GET_COUNTER(&htim2);
 		elapsed_time = end_time - start_time;
 		collect_data = false;
@@ -214,7 +214,6 @@ void StartADC(void *argument)
 		ad7676_display_samples(awaited_samples, &received_samples, UARTLog);
 		sprintf(buffer, "ADC Read Freq: %d, ADC Collect Freq: %d", read_freq, collect_freq);
 		UARTLog(buffer);
-		osThreadFlagsClear(awaited_samples);
 	}
   /* USER CODE END StartADC */
 }
@@ -305,8 +304,21 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi){
 	if (hspi->Instance == SPI2){
 		AD7676_CS_ON;
+//		if (received_samples < awaited_samples){
+//			ad7676_start_conversion();
+//			received_samples++;
+//		}
+//		else {
+//			osThreadFlagsSet(adc_handlerHandle, 0x01);
+//		}
 		osThreadFlagsSet(adc_handlerHandle, received_samples++);
 		ad7676_start_conversion();
+	}
+}
+
+void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi){
+	if (hspi->Instance == SPI2){
+		while(1) __NOP();
 	}
 }
 

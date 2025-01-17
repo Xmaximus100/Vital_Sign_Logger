@@ -28,7 +28,7 @@ typedef struct __data_Collector {
 
 void ad7676_init(data_Collector_TypeDef** ad7676_data);
 
-void ad7676_spi_read(uint16_t* buf, uint8_t size);
+void ad7676_spi_read(uint8_t* buf, uint8_t size);
 
 int ad7676_calculate_output(int32_t sample);
 
