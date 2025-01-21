@@ -4,7 +4,7 @@
 ../Core/Src/freertos.c:228:6:StartPLL	1
 ../Core/Src/freertos.c:250:6:StartATCmds	2
 ../Core/Src/freertos.c:273:6:HAL_UARTEx_RxEventCallback	4
-../Core/Src/freertos.c:304:6:HAL_SPI_RxCpltCallback	2
+../Core/Src/freertos.c:304:6:HAL_SPI_RxCpltCallback	3
 ../Core/Src/freertos.c:319:6:HAL_SPI_ErrorCallback	2
 ../Core/Src/freertos.c:325:6:HAL_UART_TxCpltCallback	1
 ../Core/Src/freertos.c:333:6:HAL_GPIO_EXTI_Callback	3

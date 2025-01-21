@@ -66,7 +66,7 @@ uint8_t receive_tmp[32];
 uint8_t received_lines = 0;
 uint16_t received_samples = 0;
 bool busy_dropped = false;
-uint64_t end_time, elapsed_time, read_time = 0;
+uint64_t end_time, elapsed_time = 0;
 extern uint64_t start_time;
 extern uint16_t awaited_samples;
 extern bool collect_data;
@@ -202,17 +202,17 @@ void StartADC(void *argument)
 	for(;;)
 	{
 	//	  UARTLog("Hello World\n\r");
-		osThreadFlagsWait(awaited_samples, osFlagsWaitAll, osWaitForever); //TODO prepare collect_data flag
+		osThreadFlagsWait(0x01, osFlagsWaitAll, osWaitForever); //TODO prepare collect_data flag
 		end_time = __HAL_TIM_GET_COUNTER(&htim2);
 		elapsed_time = end_time - start_time;
 		collect_data = false;
 		received_samples = 0;
 		uint32_t base_freq = 80000000;
-		uint32_t read_freq = base_freq/read_time;
+//		uint32_t read_freq = base_freq/read_time;
 		uint32_t collect_freq = (base_freq*awaited_samples)/elapsed_time;
 		char buffer[50];
 		ad7676_display_samples(awaited_samples, &received_samples, UARTLog);
-		sprintf(buffer, "ADC Read Freq: %d, ADC Collect Freq: %d", read_freq, collect_freq);
+		sprintf(buffer, "ADC Collect Freq: %d", (int)collect_freq);
 		UARTLog(buffer);
 	}
   /* USER CODE END StartADC */
@@ -304,15 +304,15 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi){
 	if (hspi->Instance == SPI2){
 		AD7676_CS_ON;
-//		if (received_samples < awaited_samples){
-//			ad7676_start_conversion();
-//			received_samples++;
-//		}
-//		else {
-//			osThreadFlagsSet(adc_handlerHandle, 0x01);
-//		}
-		osThreadFlagsSet(adc_handlerHandle, received_samples++);
-		ad7676_start_conversion();
+		if (received_samples < awaited_samples){
+			ad7676_start_conversion();
+			received_samples++;
+		}
+		else {
+			osThreadFlagsSet(adc_handlerHandle, 0x01);
+		}
+//		osThreadFlagsSet(adc_handlerHandle, received_samples++);
+//		ad7676_start_conversion();
 	}
 }
 
@@ -333,7 +333,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if (GPIO_Pin == ADC_BUSY_Pin && collect_data){
-		ad7676_read_one_sample(&read_time);
+		ad7676_read_one_sample();
 //		osThreadFlagsSet(adc_handlerHandle, 0x01);
 //		if(busy_dropped == false)
 //		busy_dropped = true;

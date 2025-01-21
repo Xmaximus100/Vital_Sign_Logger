@@ -1,6 +1,6 @@
 ../Core/Src/freertos.c:122:6:MX_FREERTOS_Init	8	static
 ../Core/Src/freertos.c:173:6:StartDefaultTask	40	static
-../Core/Src/freertos.c:196:6:StartADC	112	static
+../Core/Src/freertos.c:196:6:StartADC	104	static
 ../Core/Src/freertos.c:228:6:StartPLL	16	static
 ../Core/Src/freertos.c:250:6:StartATCmds	48	static
 ../Core/Src/freertos.c:273:6:HAL_UARTEx_RxEventCallback	16	static
