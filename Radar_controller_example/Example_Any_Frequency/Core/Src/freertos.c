@@ -64,11 +64,11 @@ extern data_Collector_TypeDef* ad7676_data;
 RingBuffer buffer;
 uint8_t receive_tmp[32];
 uint8_t received_lines = 0;
-uint16_t received_samples = 0;
+uint32_t received_samples = 0;
 bool busy_dropped = false;
 uint64_t end_time, elapsed_time = 0;
 extern uint64_t start_time;
-extern uint16_t awaited_samples;
+extern uint32_t awaited_samples;
 extern bool collect_data;
 extern bool continuous_mode;
 
@@ -107,6 +107,8 @@ const osThreadAttr_t at_cmds_handler_attributes = {
 
 /* USER CODE END FunctionPrototypes */
 
+void DMA1_Channel4_IRQHandler(void);
+void SPI2_IRQHandler(void);
 void StartDefaultTask(void *argument);
 void StartADC(void *argument);
 void StartPLL(void *argument);
@@ -199,6 +201,8 @@ void StartADC(void *argument)
 	ad7676_init(&ad7676_data);
 	HAL_TIM_Base_Start(&htim2);
   /* Infinite loop */
+	ad7676_read_samples(10000);
+	ad7676_start_conversion();
 	for(;;)
 	{
 	//	  UARTLog("Hello World\n\r");
@@ -316,6 +320,34 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi){
 	}
 }
 
+void SPI2_IRQHandler(void){
+	SPI2->CR1 &= ~SPI_CR1_SPE;
+	while((SPI2->CR1 & SPI_CR1_SPE) != 0);
+//	while((SPI2->SR & SPI_SR_FRLVL) != 0);
+	__NVIC_ClearPendingIRQ(SPI2_IRQn);
+	SPI2->CR1 |= SPI_CR1_SPE;
+}
+
+void DMA1_Channel4_IRQHandler(void) //Remember to comment out this line in stm32l4xx_it.c row 170
+{
+	if(DMA1->ISR & DMA_ISR_TCIF4){
+
+		SPI2->CR2 &= ~(SPI_CR2_RXDMAEN);
+		SPI2->CR1 &= ~(SPI_CR1_SPE);
+		while((SPI2->SR & SPI_SR_BSY) != 0);
+		DMA1->IFCR |= DMA_IFCR_CTCIF4; // clear interrupt
+		SPI2->CR2 &= ~SPI_CR2_RXNEIE;
+		AD7676_CS_ON;
+		received_samples++;
+		if (received_samples < awaited_samples){
+			ad7676_start_conversion();
+		}
+		else {
+			osThreadFlagsSet(adc_handlerHandle, 0x01);
+		}
+	} //do sth if DMA transfer complete is raised
+}
+
 void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi){
 	if (hspi->Instance == SPI2){
 		while(1) __NOP();
@@ -339,5 +371,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 //		busy_dropped = true;
 	}
 }
+
 /* USER CODE END Application */
 

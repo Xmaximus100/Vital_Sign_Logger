@@ -44,7 +44,7 @@ void* LightLED(void* state){
 
 void* ReadADC(void* samples){
 	static bool ret;
-	uint16_t* value = (uint16_t*)samples;
+	uint32_t* value = (uint16_t*)samples;
 	if (*value <= 0 && *value > ad7676_data->data_ptr_max) ret = false;
 	else {
 		ad7676_read_samples(*value);

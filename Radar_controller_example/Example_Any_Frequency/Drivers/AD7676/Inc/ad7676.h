@@ -34,7 +34,7 @@ void ad7676_spi_read_raw(uint8_t* buf, uint16_t size);
 
 int ad7676_calculate_output(int32_t sample);
 
-void ad7676_read_samples(uint16_t samples);
+void ad7676_read_samples(uint32_t samples);
 
 void ad7676_read_continuous(bool enable);
 
@@ -43,4 +43,6 @@ void ad7676_display_samples(uint16_t awaited_samples, uint16_t* received_samples
 void ad7676_read_one_sample();
 
 void ad7676_start_conversion(void);
+
+//void DMA1_Channel4_IRQHandler(void);
 

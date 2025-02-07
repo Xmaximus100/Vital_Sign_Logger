@@ -15,31 +15,38 @@
 data_Collector_TypeDef* ad7676_data;
 bool collect_data = false;
 bool continuous_mode = false;
-uint16_t awaited_samples = 0;
+uint32_t awaited_samples = 0;
 static uint64_t start_time, end_time, elapsed_time = 0;
 
 
-static ad7676_spi_configuration(){
+static void ad7676_spi_configuration(){
 //	SPI_CR1_BIDIMODE 0
 //	SPI_CR1_BIDIOE 0
-	SPI2->CR1 |= SPI_CR1_CRCEN;
+//	SPI2->CR1 |= SPI_CR1_CRCEN;
 	SPI2->CR1 |= SPI_CR1_RXONLY;
 //	SPI_CR1_LSBFIRST 0
 //	SPI2->CR1 |= SPI_CR1_SPE; //enable when ready
-	SPI2->CR1 |= SPI_CR1_BR_2; //ultimately leave 0
+	SPI2->CR1 |= SPI_CR1_BR_0; // | SPI_CR1_BR_1); //ultimately leave 0
 	SPI2->CR1 |= SPI_CR1_MSTR;
 	SPI2->CR1 |= SPI_CR1_CPOL; //spi configuration CPOL 1 CPHA 0
 //	SPI2->CR1 |= SPI_CR1_CPHA 0
 
+//	SPI2->CR1 = SPI_CR1_CRCEN | SPI_CR1_RXONLY |
+//			SPI_CR1_BR_2 | SPI_CR1_MSTR | SPI_CR1_CPOL;
+
 //	SPI2->CR2 |= SPI_CR2_FRXTH 0
 	SPI2->CR2 |= SPI_CR2_DS;
-//	SPI2->CR2 |= SPI_CR2_RXNEIE; //enable when RXNE interrupt necessary
+//	SPI2->CR2 |= (SPI_CR2_DS_0 | SPI_CR2_DS_1 | SPI_CR2_DS_2);
+	SPI2->CR2 |= SPI_CR2_RXNEIE; //enable when RXNE interrupt necessary
 //	SPI2->CR2 |= SPI_CR2_NSSP; //no NSS pulse between data
 	SPI2->CR2 |= SPI_CR2_SSOE; //master SS enabled
 	SPI2->CR2 |= SPI_CR2_RXDMAEN; //DMA request is set with every RXNE flag
+
+//	SPI2->CR2 = SPI_CR2_DS | SPI_CR2_SSOE |
+//			SPI_CR2_RXDMAEN;
 }
 
-static ad7676_dma_configuration(){
+static void ad7676_dma_configuration(){
 	DMA1_Channel4->CCR |= DMA_CCR_PL_1; //priority high
 	DMA1_Channel4->CCR |= DMA_CCR_MSIZE_0; //mem size 16-bit
 	DMA1_Channel4->CCR |= DMA_CCR_PSIZE_0; //periph size 16-bit
@@ -48,6 +55,34 @@ static ad7676_dma_configuration(){
 //	DMA1_Channel4->CCR |= DMA_CCR_DIR 0
 	DMA1_Channel4->CCR |= DMA_CCR_TCIE; //transfer complete interrupt en
 //	DMA1_Channel4->CCR |= DMA_CCR_EN; //TODO check if needed to set
+	uint8_t num_channel = 4;
+	uint8_t num_half_bytes = 4;
+	DMA1_CSELR->CSELR &= ~(0xF << num_half_bytes*(num_channel-1));
+	DMA1_CSELR->CSELR |= 1 << num_half_bytes*(num_channel-1);
+}
+
+static void ad7676_clock_configuration(){
+	__HAL_RCC_SPI2_CLK_ENABLE();
+
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = GPIO_PIN_2;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_12;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    HAL_NVIC_SetPriority(SPI2_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(SPI2_IRQn);
 }
 
 
@@ -65,6 +100,7 @@ void ad7676_init(data_Collector_TypeDef** ad7676_data)
 
 	*ad7676_data = init_data;
 
+	ad7676_clock_configuration();
 	ad7676_spi_configuration();
 	ad7676_dma_configuration();
 }
@@ -350,34 +386,37 @@ int ad7676_calculate_output(int32_t sample){
 	return sample_voltage;  //assuming range is +/-10V and REF is internal 2,5V datasheet p.23
 }
 
-static ad7676_spi_transaction(){
+static void ad7676_spi_transaction(){
 	while(SPI2->SR & SPI_SR_BSY); //check if SPI is busy
 //	SPI2->SR & SPI_SR_RXNE //check if RX buffer is empty
 //	SPI2->DR //SPI FIFO pointer
 }
 
-static ad7676_dma_enable_stream(uint16_t data_size, uint32_t src_addr, uint32_t dst_addr){
+static void ad7676_dma_enable_stream(uint16_t data_size, uint32_t src_addr, uint32_t dst_addr){
 	DMA1_Channel4->CNDTR = data_size;
 	DMA1_Channel4->CPAR = src_addr;
 	DMA1_Channel4->CMAR = dst_addr;
 }
 
-void DMA1_Channel4_IRQHandler(void) //Remember to comment out this line in stm32l4xx_it.c row 170
-{
-	if(DMA1->ISR & DMA_ISR_TCIF4){
-
-		SPI2->CR2 &= ~(SPI_CR2_RXDMAEN);
-		SPI2->CR1 &= ~(SPI_CR1_SPE);
-
-		DMA1->IFCR |= DMA_IFCR_CTCIF4; // clear interrupt
-	} //do sth if DMA transfer complete is raised
-}
+//void DMA1_Channel4_IRQHandler(void) //Remember to comment out this line in stm32l4xx_it.c row 170
+//{
+//	if(DMA1->ISR & DMA_ISR_TCIF4){
+//
+//		SPI2->CR2 &= ~(SPI_CR2_RXDMAEN);
+//		SPI2->CR1 &= ~(SPI_CR1_SPE);
+//
+//		DMA1->IFCR |= DMA_IFCR_CTCIF4; // clear interrupt
+//	} //do sth if DMA transfer complete is raised
+//}
 
 void ad7676_spi_read_raw(uint8_t* buf, uint16_t size){
 	SPI2->CR1 &= ~(SPI_CR1_SPE);
+	SPI2->CR2 &= ~(SPI_CR2_RXDMAEN);
+	SPI2->CR2 &= ~(SPI_CR2_FRXTH);
 
 	DMA1_Channel4->CCR &= ~(DMA_CCR_EN);
-	ad7676_dma_enable_stream(size, SPI2->DR, (uint32_t)buf);
+	DMA1->IFCR |= DMA_ISR_GIF4;
+	ad7676_dma_enable_stream(size, (uint32_t)&(SPI2->DR), (uint32_t)buf);
 	DMA1_Channel4->CCR |= DMA_CCR_TCIE;
 	DMA1_Channel4->CCR |= DMA_CCR_EN; //DMA en
 
@@ -395,6 +434,7 @@ void ad7676_read_one_sample() //when BUSY goes down
 //	start_time = __HAL_TIM_GET_COUNTER(&htim2);
 //	uint16_t buf[4];
 	AD7676_CS_OFF;
+//	ADC_CS_GPIO_Port->BRR = (uint32_t)ADC_CS_Pin;
 	ad7676_spi_read_raw((uint8_t*)&ad7676_data->data_buf[ad7676_data->data_ptr], 4);
 
 //	HAL_SPI_Receive_DMA(ad7676_data->spi_desc, (uint8_t*)&ad7676_data->data_buf[ad7676_data->data_ptr], 4);
@@ -414,7 +454,7 @@ void ad7676_read_one_sample() //when BUSY goes down
 //	*timer = elapsed_time;
 }
 
-void ad7676_read_samples(uint16_t samples){
+void ad7676_read_samples(uint32_t samples){
 	awaited_samples = samples;
 	collect_data = true;
 }
