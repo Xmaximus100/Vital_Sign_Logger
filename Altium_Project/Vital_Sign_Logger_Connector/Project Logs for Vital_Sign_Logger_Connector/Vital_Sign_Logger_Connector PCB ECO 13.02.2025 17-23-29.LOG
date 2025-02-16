@@ -1,0 +1,52 @@
+Added Pin To Net: NetName=ADC_BUSY Pin=J1-2
+Added Pin To Net: NetName=ADC_BUSY Pin=J3-7
+Added Net: Name=ADC_BUSY
+Added Pin To Net: NetName=ADC_CONVST Pin=J1-1
+Added Pin To Net: NetName=ADC_CONVST Pin=J3-12
+Added Net: Name=ADC_CONVST
+Added Pin To Net: NetName=ADC_CS Pin=J1-21
+Added Pin To Net: NetName=ADC_CS Pin=J3-8
+Added Net: Name=ADC_CS
+Added Pin To Net: NetName=ADC_DOUT_A Pin=J2-35
+Added Pin To Net: NetName=ADC_DOUT_A Pin=J3-5
+Added Net: Name=ADC_DOUT_A
+Added Pin To Net: NetName=ADC_DOUT_B Pin=J4-12
+Added Net: Name=ADC_DOUT_B
+Added Pin To Net: NetName=ADC_DOUT_C Pin=J4-11
+Added Net: Name=ADC_DOUT_C
+Added Pin To Net: NetName=ADC_DOUT_D Pin=J4-10
+Added Net: Name=ADC_DOUT_D
+Added Pin To Net: NetName=ADC_FIRSTDATA Pin=J3-6
+Added Net: Name=ADC_FIRSTDATA
+Added Pin To Net: NetName=ADC_RD_SCLK Pin=J1-25
+Added Pin To Net: NetName=ADC_RD_SCLK Pin=J3-9
+Added Net: Name=ADC_RD_SCLK
+Added Pin To Net: NetName=ADC_RESET Pin=J3-10
+Added Net: Name=ADC_RESET
+Added Pin To Net: NetName=ADC_SDI Pin=J4-9
+Added Net: Name=ADC_SDI
+Added Pin To Net: NetName=ADC_WR Pin=J3-11
+Added Net: Name=ADC_WR
+Added Pin To Net: NetName=GND Pin=J3-3
+Added Pin To Net: NetName=GND Pin=J3-4
+Added Pin To Net: NetName=GND Pin=J4-3
+Added Pin To Net: NetName=GND Pin=J4-4
+Added Net: Name=GND
+Added Pin To Net: NetName=PLL_CLK Pin=J2-1
+Added Pin To Net: NetName=PLL_CLK Pin=J4-7
+Added Net: Name=PLL_CLK
+Added Pin To Net: NetName=PLL_DATA Pin=J2-3
+Added Pin To Net: NetName=PLL_DATA Pin=J4-6
+Added Net: Name=PLL_DATA
+Added Pin To Net: NetName=PLL_LE Pin=J1-23
+Added Pin To Net: NetName=PLL_LE Pin=J4-5
+Added Net: Name=PLL_LE
+Added Pin To Net: NetName=PLL_SYNC Pin=J1-33
+Added Pin To Net: NetName=PLL_SYNC Pin=J4-8
+Added Net: Name=PLL_SYNC
+Added Pin To Net: NetName=VCC Pin=J3-1
+Added Pin To Net: NetName=VCC Pin=J3-2
+Added Pin To Net: NetName=VCC Pin=J4-1
+Added Pin To Net: NetName=VCC Pin=J4-2
+Added Net: Name=VCC
+Added Member To Class: ClassName=Vital_Sign_Logger_Connector Member=Component J2 61304021821

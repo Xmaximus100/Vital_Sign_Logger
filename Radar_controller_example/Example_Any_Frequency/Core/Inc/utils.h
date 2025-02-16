@@ -13,5 +13,6 @@ void UARTLog(char* message);
 //void* SetPLL_Period(void* period_ms);
 void* LightLED(void* state);
 void* ReadADC(void* samples);
+void* ReadRawADC(void* samples);
 
 #endif /* INC_UTILS_H_ */

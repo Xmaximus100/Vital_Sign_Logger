@@ -1,0 +1,7 @@
+Change Component Designator: OldDesignator=J? NewDesignator=J1
+Change Component Designator: OldDesignator=J? NewDesignator=J2
+Change Component Designator: OldDesignator=J? NewDesignator=J3
+Change Component Designator: OldDesignator=J? NewDesignator=J4
+Added Member To Class: ClassName=Vital_Sign_Logger_Connector Member=Component J1 61304021821
+Added Member To Class: ClassName=Vital_Sign_Logger_Connector Member=Component J3 613012243121
+Added Member To Class: ClassName=Vital_Sign_Logger_Connector Member=Component J4 613012243121

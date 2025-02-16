@@ -1,0 +1,6 @@
+Removed Pin From Net: NetName=ADC_FIRSTDATA Pin=J2-23
+Removed Pin From Net: NetName=ADC_RESET Pin=J2-25
+Removed Pin From Net: NetName=ADC_WR Pin=J2-27
+Added Pin To Net: NetName=ADC_WR Pin=J1-3
+Added Pin To Net: NetName=ADC_FIRSTDATA Pin=J1-4
+Added Pin To Net: NetName=ADC_RESET Pin=J1-6

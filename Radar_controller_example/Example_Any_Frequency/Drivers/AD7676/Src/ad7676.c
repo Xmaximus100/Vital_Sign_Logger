@@ -486,6 +486,25 @@ void ad7676_display_samples(uint16_t awaited_samples, uint16_t* received_samples
 	}
 }
 
+void ad7676_send_samples(uint16_t awaited_samples, uint16_t* received_samples, void (*displayFunction)(char* message)){
+	char buffer[64];
+	int v1, v2, v3, v4;
+	uint16_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
+	collect_data = false;
+	*received_samples = 0;
+	for(uint16_t i=0; i<awaited_samples; i++){
+		v1 = ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][0];
+		v2 = ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][1];
+		v3 = ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][2];
+		v4 = ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][3];
+		sprintf(buffer, "S%d,%d,%d,%d,%d\n\r",
+				i, v1, v2, v3, v4
+				);
+		displayFunction(buffer);
+	}
+	displayFunction("END\n\r");
+}
+
 void ad7676_reset_data(data_Collector_TypeDef* ad7676_data)
 {
 	for(ad7676_data->current_channel=0; ad7676_data->current_channel<ad7676_data->num_channels; ad7676_data->current_channel++){

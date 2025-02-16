@@ -1,0 +1,8 @@
+Added Pin To Net: NetName=ADC_FIRSTDATA Pin=J2-23
+Added Pin To Net: NetName=ADC_RESET Pin=J2-25
+Added Pin To Net: NetName=ADC_WR Pin=J2-27
+Added Pin To Net: NetName=GND Pin=J4-9
+Added Pin To Net: NetName=GND Pin=J4-10
+Added Pin To Net: NetName=GND Pin=J4-11
+Added Pin To Net: NetName=GND Pin=J4-12
+Change Net Name : Old Net Name=GND New Net Name=ADC_DOUT_B
