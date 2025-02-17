@@ -3,6 +3,7 @@
 #include "ad7676.h"
 #include "no_os_alloc.h"
 #include "spi.h"
+#include "usart.h"
 #include "main.h"
 #include "tim.h"
 #include "stm32l4xx_hal.h"
@@ -94,7 +95,7 @@ void ad7676_init(data_Collector_TypeDef** ad7676_data)
 
 	init_data->spi_desc = &hspi2;
 	init_data->data_ptr = 0;
-	init_data->data_ptr_max = 200;
+	init_data->data_ptr_max = 500;
 	init_data->current_channel = 0;
 	init_data->num_channels = 4;
 
@@ -486,23 +487,24 @@ void ad7676_display_samples(uint16_t awaited_samples, uint16_t* received_samples
 	}
 }
 
-void ad7676_send_samples(uint16_t awaited_samples, uint16_t* received_samples, void (*displayFunction)(char* message)){
-	char buffer[64];
-	int v1, v2, v3, v4;
-	uint16_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
-	collect_data = false;
-	*received_samples = 0;
-	for(uint16_t i=0; i<awaited_samples; i++){
-		v1 = ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][0];
-		v2 = ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][1];
-		v3 = ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][2];
-		v4 = ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][3];
-		sprintf(buffer, "S%d,%d,%d,%d,%d\n\r",
-				i, v1, v2, v3, v4
-				);
-		displayFunction(buffer);
-	}
-	displayFunction("END\n\r");
+void ad7676_send_samples(uint16_t awaited_samples, uint16_t* received_samples, UART_HandleTypeDef* huart){
+    uint16_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
+    collect_data = false;
+    *received_samples = 0;
+
+    for(uint16_t i = 0; i < awaited_samples; i++){
+        uint8_t frame[10]; // 8 bytes for data + 1 for the null terminator
+
+        // Copy 8 bytes directly from the data buffer
+        // Make sure to specify the number of bytes (4 channels x 2 bytes)
+        memcpy(frame, &i, 2);
+        memcpy(frame+2, &(ad7676_data->data_buf[(tmp_ptr + i) % ad7676_data->data_ptr_max]), 8);
+//        frame[10] = '\n'; // Null-terminate the string (optional if displayFunction expects a C-string)
+        HAL_UART_Transmit(huart, frame, 10, 1000);
+    }
+
+    // Send termination frame
+//    displayFunction("END\n\r");
 }
 
 void ad7676_reset_data(data_Collector_TypeDef* ad7676_data)

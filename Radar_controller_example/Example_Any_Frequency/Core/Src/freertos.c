@@ -217,12 +217,14 @@ void StartADC(void *argument)
 		uint32_t collect_freq = (base_freq*awaited_samples)/elapsed_time;
 		char buffer[50];
 		if(raw_data){
-			ad7676_send_samples(awaited_samples, &received_samples, UARTLog);
+			ad7676_send_samples(awaited_samples, &received_samples, &huart2);
 			raw_data = false;
 		}
-		else ad7676_display_samples(awaited_samples, &received_samples, UARTLog);
-		sprintf(buffer, "ADC Collect Freq: %d", (int)collect_freq);
-		UARTLog(buffer);
+		else{
+			ad7676_display_samples(awaited_samples, &received_samples, UARTLog);
+			sprintf(buffer, "ADC Collect Freq: %d", (int)collect_freq);
+			UARTLog(buffer);
+		}
 	}
   /* USER CODE END StartADC */
 }

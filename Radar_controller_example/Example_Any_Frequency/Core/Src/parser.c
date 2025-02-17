@@ -26,7 +26,7 @@ at_Commands_TypeDef at_cmds[] = {
 	{"RUN", "New configuration applied\n\r", "New configuration failed to apply\n\r", ADF5355_Run, 1},
 	{"SETUP", "Configuration succeed\n\r", "Configuration failed\n\r", ADF5355_Load, 1},
 	{"READ", "ADC Read success\n\r", "ADC Read failed\n\r", ReadADC, 0},
-	{"READRAW", "ADC Read Raw success\n\r", "ADC Read Raw failed\n\r", ReadRawADC, 0}
+	{"READRAW", "1111111111", "0000000000", ReadRawADC, 0}
 };
 
 void ParserTakeLine(RingBuffer* buffer, uint8_t* destination){
