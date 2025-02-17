@@ -3,3 +3,4 @@
 .settings/
 *.ld
 *.step
+*.STEP
