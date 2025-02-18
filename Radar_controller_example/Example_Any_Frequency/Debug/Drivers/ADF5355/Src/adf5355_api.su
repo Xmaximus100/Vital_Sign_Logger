@@ -1,9 +1,0 @@
-../Drivers/ADF5355/Src/adf5355_api.c:32:7:ADF5355_SetFrequencyOut	24	static
-../Drivers/ADF5355/Src/adf5355_api.c:43:7:ADF5355_SetFrequencyIn	24	static
-../Drivers/ADF5355/Src/adf5355_api.c:54:7:ADF5355_SetPower	24	static
-../Drivers/ADF5355/Src/adf5355_api.c:65:7:ADF5355_SetCurrent	24	static
-../Drivers/ADF5355/Src/adf5355_api.c:76:7:ADF5355_SetMuxOut	24	static
-../Drivers/ADF5355/Src/adf5355_api.c:90:7:ADF5355_Enable	24	static
-../Drivers/ADF5355/Src/adf5355_api.c:104:6:ADF5355_Param_Init	48	static
-../Drivers/ADF5355/Src/adf5355_api.c:129:7:ADF5355_Load	24	static
-../Drivers/ADF5355/Src/adf5355_api.c:137:7:ADF5355_Run	24	static
