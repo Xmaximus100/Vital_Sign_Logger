@@ -8,6 +8,6 @@
 ../Core/Src/freertos.c:315:6:HAL_SPI_RxCpltCallback	3
 ../Core/Src/freertos.c:330:6:SPI2_IRQHandler	2
 ../Core/Src/freertos.c:338:6:DMA1_Channel4_IRQHandler	4
-../Core/Src/freertos.c:358:6:HAL_SPI_ErrorCallback	2
-../Core/Src/freertos.c:364:6:HAL_UART_TxCpltCallback	1
-../Core/Src/freertos.c:372:6:HAL_GPIO_EXTI_Callback	3
+../Core/Src/freertos.c:359:6:HAL_SPI_ErrorCallback	2
+../Core/Src/freertos.c:365:6:HAL_UART_TxCpltCallback	1
+../Core/Src/freertos.c:373:6:HAL_GPIO_EXTI_Callback	3

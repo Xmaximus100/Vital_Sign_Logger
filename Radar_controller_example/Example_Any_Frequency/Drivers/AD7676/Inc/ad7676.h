@@ -19,7 +19,7 @@ typedef union __data_Buffer {
 
 typedef struct __data_Collector {
 	SPI_HandleTypeDef* spi_desc;
-	uint16_t data_buf[200][4];
+	uint16_t data_buf[10000][4];
 	uint16_t data_ptr;
 	uint16_t data_ptr_max;
 	uint8_t current_channel;

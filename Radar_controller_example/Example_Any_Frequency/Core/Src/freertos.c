@@ -345,6 +345,7 @@ void DMA1_Channel4_IRQHandler(void) //Remember to comment out this line in stm32
 		DMA1->IFCR |= DMA_IFCR_CTCIF4; // clear interrupt
 		SPI2->CR2 &= ~SPI_CR2_RXNEIE;
 		AD7676_CS_ON;
+		ad7676_data->data_ptr = (ad7676_data->data_ptr + 1) % ad7676_data->data_ptr_max;
 		received_samples++;
 		if (received_samples < awaited_samples){
 			ad7676_start_conversion();
