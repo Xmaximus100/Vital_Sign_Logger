@@ -1,7 +1,11 @@
 # STM32CubeIDE
 .metadata/
 .settings/
-.Debug/
+**/Debug/
+.History/
 *.ld
 *.step
 *.STEP
+*.Zip
+*.png
+
