@@ -1,4 +1,0 @@
-../Core/Src/utils.c:22:6:UARTLog	1
-../Core/Src/utils.c:35:7:LightLED	3
-../Core/Src/utils.c:46:7:ReadADC	3
-../Core/Src/utils.c:59:7:ReadRawADC	3

@@ -1,3 +1,0 @@
-../Core/Src/delay.c:25:19:Initialize_Delay	1
-../Core/Src/delay.c:30:6:delay_us	2
-../Core/Src/delay.c:46:6:delay_ms	1

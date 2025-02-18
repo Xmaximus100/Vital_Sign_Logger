@@ -1,3 +1,0 @@
-../Core/Src/ring_buffer.c:10:9:WriteToBuffer	3
-../Core/Src/ring_buffer.c:32:9:ReadFromBuffer	2
-../Core/Src/ring_buffer.c:48:6:FlushBuffer	1
