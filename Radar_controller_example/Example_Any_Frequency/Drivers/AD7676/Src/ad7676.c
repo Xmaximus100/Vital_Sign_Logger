@@ -64,6 +64,7 @@ static void ad7676_dma_configuration(){
 
 static void ad7676_clock_configuration(){
 	__HAL_RCC_SPI2_CLK_ENABLE();
+	__HAL_RCC_DMA1_CLK_ENABLE();
 
 	__HAL_RCC_GPIOC_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
@@ -84,6 +85,11 @@ static void ad7676_clock_configuration(){
 
     HAL_NVIC_SetPriority(SPI2_IRQn, 5, 0);
 	HAL_NVIC_EnableIRQ(SPI2_IRQn);
+
+	/* DMA interrupt init */
+	/* DMA1_Channel4_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
 }
 
 
@@ -148,15 +154,15 @@ void ad7676_read_continuous(bool enable){
 	continuous_mode = enable;
 }
 
-void ad7676_display_samples(uint16_t awaited_samples, uint16_t* received_samples, void (*displayFunction)(char* message)){
+void ad7676_display_samples(uint32_t awaited_samples, uint16_t* received_samples, void (*displayFunction)(char* message)){
 	char buffer[64];
 	int v1, v2, v3, v4;
-	uint16_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
+	uint32_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
 	collect_data = false;
 	*received_samples = 0;
 	sprintf(buffer, "Collected samples:%d\n\rCHANNEL1 CHANNEL2 CHANNEL3 CHANNEL4\n\r", awaited_samples);
 	displayFunction(buffer);
-	for(uint16_t i=0; i<awaited_samples; i++){
+	for(uint32_t i=0; i<awaited_samples; i++){
 		v1 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][0]);
 		v2 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][1]);
 		v3 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][2]);
@@ -171,16 +177,16 @@ void ad7676_display_samples(uint16_t awaited_samples, uint16_t* received_samples
 	}
 }
 
-void ad7676_send_samples(uint16_t awaited_samples, uint16_t* received_samples, UART_HandleTypeDef* huart){
-    uint16_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
+void ad7676_send_samples(uint32_t awaited_samples, uint16_t* received_samples, UART_HandleTypeDef* huart){
+	uint32_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
     collect_data = false;
     *received_samples = 0;
 
-    for(uint16_t i = 0; i < awaited_samples; i++){
-        uint8_t frame[10];
-        memcpy(frame, &i, 2); //first 2 bytes for sample index
-        memcpy(frame+2, &(ad7676_data->data_buf[(tmp_ptr + i) % ad7676_data->data_ptr_max]), 8); //bytes order frame[2] low_byte, frame[3] high_byte
-        HAL_UART_Transmit(huart, frame, 10, 1000);
+    for(uint32_t i = 0; i < awaited_samples; i++){
+        uint8_t frame[11];
+        memcpy(frame, &i, 3); //first 2 bytes for sample index
+        memcpy(frame+3, &(ad7676_data->data_buf[(tmp_ptr + i) % ad7676_data->data_ptr_max]), 8); //bytes order frame[2] low_byte, frame[3] high_byte
+        HAL_UART_Transmit(huart, frame, 11, 1000);
     }
 }
 

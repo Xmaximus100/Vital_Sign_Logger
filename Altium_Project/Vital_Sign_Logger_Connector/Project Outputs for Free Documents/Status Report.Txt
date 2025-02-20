@@ -1,0 +1,24 @@
+Project Outputs Generation Report
+---------------------------------
+Start Output Generation At 00:25:46 On 20.02.2025
+
+Output: Gerber Files
+Type  : Gerber
+From  : Variant [[No Variations]] of PCB Document [Vital_Sign_Logger_Connector.PcbDoc]
+   Generated File[Vital_Sign_Logger_Connector.GTO]
+   Generated File[Vital_Sign_Logger_Connector.GTP]
+   Generated File[Vital_Sign_Logger_Connector.GTS]
+   Generated File[Vital_Sign_Logger_Connector.GTL]
+   Generated File[Vital_Sign_Logger_Connector.GBL]
+   Generated File[Vital_Sign_Logger_Connector.GBS]
+   Generated File[Vital_Sign_Logger_Connector.GBP]
+   Generated File[Vital_Sign_Logger_Connector.GBO]
+   Generated File[Vital_Sign_Logger_Connector.GM]
+   Generated File[Vital_Sign_Logger_Connector.EXTREP]
+   Generated File[Vital_Sign_Logger_Connector.REP]
+
+
+Files Generated   : 11
+Documents Printed : 0
+
+Finished Output Generation At 00:25:48 On 20.02.2025
