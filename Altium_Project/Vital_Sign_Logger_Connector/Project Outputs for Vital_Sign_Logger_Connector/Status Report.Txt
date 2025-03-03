@@ -1,0 +1,22 @@
+Output: Gerber X2 Files
+Type  : GerberX2
+From  : Variant [[No Variations]] of Project [Vital_Sign_Logger_Connector.PrjPcb]
+   Generated File[Vital_Sign_Logger_Connector_Copper_Signal_Top.gbr]
+   Generated File[Vital_Sign_Logger_Connector_Copper_Signal_Bot.gbr]
+   Generated File[Vital_Sign_Logger_Connector_Legend_Top.gbr]
+   Generated File[Vital_Sign_Logger_Connector_Legend_Bot.gbr]
+   Generated File[Vital_Sign_Logger_Connector_Soldermask_Top.gbr]
+   Generated File[Vital_Sign_Logger_Connector_Soldermask_Bot.gbr]
+   Generated File[Vital_Sign_Logger_Connector_Paste_Top.gbr]
+   Generated File[Vital_Sign_Logger_Connector_Paste_Bot.gbr]
+   Generated File[Vital_Sign_Logger_Connector_Profile.gbr]
+   Generated File[Vital_Sign_Logger_Connector_NPTH_Drill.gbr]
+   Generated File[Vital_Sign_Logger_Connector_PTH_Drill.gbr]
+   Generated File[Vital_Sign_Logger_Connector.EXTREP]
+   Generated File[Vital_Sign_Logger_Connector.REP]
+
+
+Files Generated   : 13
+Documents Printed : 0
+
+Finished Output Generation At 14:05:27 On 27.02.2025

@@ -72,6 +72,7 @@ extern bool raw_data;
 extern uint32_t awaited_samples;
 extern bool collect_data;
 extern bool continuous_mode;
+uint32_t test_iter = 0;
 
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
@@ -108,8 +109,6 @@ const osThreadAttr_t at_cmds_handler_attributes = {
 
 /* USER CODE END FunctionPrototypes */
 
-void DMA1_Channel4_IRQHandler(void);
-void SPI2_IRQHandler(void);
 void StartDefaultTask(void *argument);
 void StartADC(void *argument);
 void StartPLL(void *argument);
@@ -203,11 +202,12 @@ void StartADC(void *argument)
 	HAL_TIM_Base_Start(&htim2);
   /* Infinite loop */
 //	ad7676_read_samples(10000);
-	ad7676_start_conversion();
+//	ad7676_start_conversion();
 	for(;;)
 	{
 	//	  UARTLog("Hello World\n\r");
 		osThreadFlagsWait(0x01, osFlagsWaitAll, osWaitForever); //TODO prepare collect_data flag
+		HAL_TIM_OC_Stop_IT(&htim4, TIM_CHANNEL_4);
 		end_time = __HAL_TIM_GET_COUNTER(&htim2);
 		elapsed_time = end_time - start_time;
 		collect_data = false;
@@ -312,6 +312,14 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 //	}
 //}
 
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
+
+	if (htim->Instance == TIM4){
+		ad7676_start_conversion();
+	}
+
+}
+
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi){
 	if (hspi->Instance == SPI2){
 		AD7676_CS_ON;
@@ -348,11 +356,13 @@ void DMA1_Channel4_IRQHandler(void) //Remember to comment out this line in stm32
 		ad7676_data->data_ptr = (ad7676_data->data_ptr + 1) % ad7676_data->data_ptr_max;
 		received_samples++;
 		if (received_samples < awaited_samples){
-			ad7676_start_conversion();
+			if (continuous_mode){
+				ad7676_send_sample(&huart2, &received_samples);
+			}
+			else ad7676_start_conversion();
+//			continue;
 		}
-		else {
-			osThreadFlagsSet(adc_handlerHandle, 0x01);
-		}
+		else osThreadFlagsSet(adc_handlerHandle, 0x01);
 	} //do sth if DMA transfer complete is raised
 }
 

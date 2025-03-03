@@ -1,0 +1,26 @@
+Removed Pin From Net: NetName=ADC_BUSY Pin=J1-1
+Removed Pin From Net: NetName=ADC_CONVST Pin=J1-2
+Removed Pin From Net: NetName=ADC_FIRSTDATA Pin=J1-3
+Removed Pin From Net: NetName=ADC_WR Pin=J1-4
+Removed Pin From Net: NetName=ADC_RESET Pin=J1-5
+Removed Pin From Net: NetName=ADC_CS Pin=J1-22
+Removed Pin From Net: NetName=PLL_LE Pin=J1-24
+Removed Pin From Net: NetName=ADC_RD_SCLK Pin=J1-26
+Removed Pin From Net: NetName=PLL_SYNC Pin=J1-34
+Removed Pin From Net: NetName=PLL_CLK Pin=J2-2
+Removed Pin From Net: NetName=PLL_DATA Pin=J2-4
+Removed Pin From Net: NetName=ADC_DOUT_A Pin=J2-36
+Change Component Designator: OldDesignator=J1 NewDesignator=J2
+Change Component Designator: OldDesignator=J2 NewDesignator=J1
+Added Pin To Net: NetName=PLL_CLK Pin=J1-1
+Added Pin To Net: NetName=PLL_DATA Pin=J1-3
+Added Pin To Net: NetName=ADC_DOUT_A Pin=J1-35
+Added Pin To Net: NetName=ADC_CONVST Pin=J2-1
+Added Pin To Net: NetName=ADC_BUSY Pin=J2-2
+Added Pin To Net: NetName=ADC_WR Pin=J2-3
+Added Pin To Net: NetName=ADC_FIRSTDATA Pin=J2-4
+Added Pin To Net: NetName=ADC_RESET Pin=J2-6
+Added Pin To Net: NetName=ADC_CS Pin=J2-21
+Added Pin To Net: NetName=PLL_LE Pin=J2-23
+Added Pin To Net: NetName=ADC_RD_SCLK Pin=J2-25
+Added Pin To Net: NetName=PLL_SYNC Pin=J2-33

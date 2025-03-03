@@ -3,9 +3,12 @@
 #define AD7676_GPIOC_MASK	0x0001
 #define AD7676_CNVST_ON		HAL_GPIO_WritePin(ADC_CNVST_GPIO_Port, ADC_CNVST_Pin, GPIO_PIN_SET)
 #define AD7676_CNVST_OFF	HAL_GPIO_WritePin(ADC_CNVST_GPIO_Port, ADC_CNVST_Pin, GPIO_PIN_RESET)
+#define AD7676_RESET_ON		HAL_GPIO_WritePin(ADC_RESET_GPIO_Port, ADC_RESET_Pin, GPIO_PIN_SET)
+#define AD7676_RESET_OFF	HAL_GPIO_WritePin(ADC_RESET_GPIO_Port, ADC_RESET_Pin, GPIO_PIN_RESET)
 #define AD7676_CS_ON		ADC_CS_GPIO_Port->BSRR = (uint32_t)ADC_CS_Pin //HAL_GPIO_WritePin(ADC_CS_GPIO_Port, ADC_CS_Pin, GPIO_PIN_SET)
 #define AD7676_CS_OFF		ADC_CS_GPIO_Port->BRR = (uint32_t)ADC_CS_Pin //HAL_GPIO_WritePin(ADC_CS_GPIO_Port, ADC_CS_Pin, GPIO_PIN_RESET)
 #define AD7676_CONVST_DELAY	for(uint8_t i=0; i<5; i++) __NOP() //12,5ns * 5 for 80MHz RCC clock
+#define AD7676_RESET_DELAY for(uint8_t i=0; i<5; i++) __NOP() //12,5ns * 5 for 80MHz RCC clock
 
 
 #include <stdint.h>
@@ -38,13 +41,19 @@ void ad7676_read_samples(uint32_t samples);
 
 void ad7676_read_continuous(bool enable);
 
-void ad7676_display_samples(uint32_t awaited_samples, uint16_t* received_samples, void (*displayFunction)(char* message));
+void ad7676_display_samples(uint32_t awaited_samples, uint32_t* received_samples, void (*displayFunction)(char* message));
 
-void ad7676_send_samples(uint32_t awaited_samples, uint16_t* received_samples, UART_HandleTypeDef* huart2);
+void ad7676_send_samples(uint32_t awaited_samples, uint32_t* received_samples, UART_HandleTypeDef* huart2);
 
-void ad7676_read_one_sample();
+void ad7676_send_sample(UART_HandleTypeDef* huart, uint32_t* received_samples);
+
+void ad7676_set_sampling_rate(uint16_t sampling_rate);
+
+void ad7676_read_one_sample(void);
 
 void ad7676_start_conversion(void);
+
+void ad7676_reset(void);
 
 //void DMA1_Channel4_IRQHandler(void);
 

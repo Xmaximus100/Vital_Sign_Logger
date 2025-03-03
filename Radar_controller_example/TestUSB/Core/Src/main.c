@@ -19,13 +19,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
-#include "usbd_cdc_if.h"
-#include "stdio.h"
-#include "stdbool.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "usbd_cdc_if.h"
+#include "string.h"
+#include "stdbool.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,6 +64,7 @@ uint8_t MessageCounter = 0; // Licznik wyslanych wiadomosci
 uint8_t MessageLength = 0; // Zawiera dlugosc wysylanej wiadomosci
 bool 	ButtonPressed = false;
 uint8_t LedState = 0;
+char *data = "HELLO WORLD\n";
 /* USER CODE END 0 */
 
 /**
@@ -106,10 +106,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  CDC_Transmit_FS((uint8_t*) data, strlen(data));
+	  HAL_Delay(1000);
 	  if(ButtonPressed){
 		  ButtonPressed = false;
 		  ++MessageCounter;
-		MessageLength = sprintf(DataToSend, "Wiadomosc nr %d\n\r", MessageCounter);
+		MessageLength = sprintf((char*) DataToSend, "Wiadomosc nr %d\n\r", MessageCounter);
 		LedState = CDC_Transmit_FS(DataToSend, MessageLength);
 		if (LedState == 1){
 			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);

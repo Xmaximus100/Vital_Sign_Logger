@@ -25,6 +25,7 @@ at_Commands_TypeDef at_cmds[] = {
 	{"EN", "EN set to %d\n\r", "Type EN 0 or 1\n\r", ADF5355_Enable, 0},
 	{"RUN", "New configuration applied\n\r", "New configuration failed to apply\n\r", ADF5355_Run, 1},
 	{"SETUP", "Configuration succeed\n\r", "Configuration failed\n\r", ADF5355_Load, 1},
+	{"CONMODE", "ADC Set Mode success\n\r", "ADC Set Mode failed\n\r", SetADCMode, 0},
 	{"READ", "ADC Read success\n\r", "ADC Read failed\n\r", ReadADC, 0},
 	{"READRAW", "11111111111", "00000000000", ReadRawADC, 0}
 };

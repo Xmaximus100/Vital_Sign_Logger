@@ -43,14 +43,24 @@ void* LightLED(void* state){
 	return &ret;
 }
 
+void* SetADCMode(void* state){
+	static bool ret;
+	uint8_t* value = (uint8_t*)state;
+	if (*value != 0 && *value != 1) ret = false;
+	else {
+		ad7676_read_continuous(*value);
+		ret = true;
+	}
+	return &ret;
+}
+
 void* ReadADC(void* samples){
 	static bool ret;
-	uint32_t* value = (uint16_t*)samples;
+	uint32_t* value = (uint32_t*)samples;
 	if (*value <= 0 && *value > ad7676_data->data_ptr_max) ret = false;
 	else {
 		ad7676_read_samples(*value);
 		start_time = __HAL_TIM_GET_COUNTER(&htim2);
-		ad7676_start_conversion();
 		ret = true;
 	}
 	return &ret;
@@ -58,14 +68,19 @@ void* ReadADC(void* samples){
 
 void* ReadRawADC(void* samples){
 	static bool ret;
-	uint32_t* value = (uint16_t*)samples;
+	uint32_t* value = (uint32_t*)samples;
 	if (*value <= 0 && *value > ad7676_data->data_ptr_max) ret = false;
 	else {
 		ad7676_read_samples(*value);
 		raw_data = true;
 		start_time = __HAL_TIM_GET_COUNTER(&htim2);
-		ad7676_start_conversion();
 		ret = true;
 	}
+	return &ret;
+}
+
+void* ResetADC(void* arg){
+	static bool ret = false;
+	ad7676_reset();
 	return &ret;
 }

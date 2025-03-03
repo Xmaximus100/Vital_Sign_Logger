@@ -1,0 +1,19 @@
+----------------------------------------------------------------------------------------------------------------------------------
+NCDrill File Report For: Vital_Sign_Logger_Connector.PcbDoc   27.02.2025  14:01:10
+----------------------------------------------------------------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII RoundHoles File : Vital_Sign_Logger_Connector.TXT
+EIA File   : Vital_Sign_Logger_Connector.DRL
+
+Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
+----------------------------------------------------------------------------------------------------------------------------------
+T1      0.85mm (33mil)                                            Round             22        PTH        426.01mm (16.77inch)
+T2      1.02mm (40mil)                                            Round             80        PTH        361.01mm (14.21inch)
+T3      1.03mm (41mil)                                            Round             24        PTH        81.88mm (3.22inch)
+T4      1.3mm (51mil)                                             Round             2         PTH        5.00mm (0.20inch)
+T5      3.5mm (138mil)                                            Round             4         PTH        286.24mm (11.27inch)
+----------------------------------------------------------------------------------------------------------------------------------
+Totals                                                                              132
+
+Total Processing Time (hh:mm:ss) : 00:00:00

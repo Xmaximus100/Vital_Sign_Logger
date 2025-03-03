@@ -12,6 +12,7 @@ void UARTLog(char* message);
 //void* SetPLL_FF(void* fill_factor);
 //void* SetPLL_Period(void* period_ms);
 void* LightLED(void* state);
+void* SetADCMode(void* state);
 void* ReadADC(void* samples);
 void* ReadRawADC(void* samples);
 

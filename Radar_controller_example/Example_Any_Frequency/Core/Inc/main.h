@@ -65,9 +65,9 @@ void Error_Handler(void);
 #define USART_RX_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
-#define ADC_DATA_Pin GPIO_PIN_6
-#define ADC_DATA_GPIO_Port GPIOC
-#define ADC_FIRSTDATA_Pin GPIO_PIN_7
+#define ADC_RESET_Pin GPIO_PIN_5
+#define ADC_RESET_GPIO_Port GPIOC
+#define ADC_FIRSTDATA_Pin GPIO_PIN_6
 #define ADC_FIRSTDATA_GPIO_Port GPIOC
 #define ADC_BUSY_Pin GPIO_PIN_8
 #define ADC_BUSY_GPIO_Port GPIOC
@@ -84,6 +84,8 @@ void Error_Handler(void);
 #define TCK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
+#define ADC_CNVST_B_Pin GPIO_PIN_8
+#define ADC_CNVST_B_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

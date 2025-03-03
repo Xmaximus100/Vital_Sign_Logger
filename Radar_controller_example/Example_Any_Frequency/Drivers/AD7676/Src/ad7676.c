@@ -17,6 +17,7 @@ data_Collector_TypeDef* ad7676_data;
 bool collect_data = false;
 bool continuous_mode = false;
 uint32_t awaited_samples = 0;
+uint16_t sampling_rate = 1000;
 static uint64_t start_time, end_time, elapsed_time = 0;
 
 
@@ -27,7 +28,7 @@ static void ad7676_spi_configuration(){
 	SPI2->CR1 |= SPI_CR1_RXONLY;
 //	SPI_CR1_LSBFIRST 0
 //	SPI2->CR1 |= SPI_CR1_SPE; //enable when ready
-	SPI2->CR1 |= SPI_CR1_BR_0; // | SPI_CR1_BR_1); //ultimately leave 0
+	SPI2->CR1 |= (SPI_CR1_BR_0 | SPI_CR1_BR_1); //ultimately leave 0
 	SPI2->CR1 |= SPI_CR1_MSTR;
 	SPI2->CR1 |= SPI_CR1_CPOL; //spi configuration CPOL 1 CPHA 0
 //	SPI2->CR1 |= SPI_CR1_CPHA 0
@@ -92,7 +93,6 @@ static void ad7676_clock_configuration(){
 	HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
 }
 
-
 void ad7676_init(data_Collector_TypeDef** ad7676_data)
 {
 	data_Collector_TypeDef* init_data;
@@ -110,6 +110,8 @@ void ad7676_init(data_Collector_TypeDef** ad7676_data)
 	ad7676_clock_configuration();
 	ad7676_spi_configuration();
 	ad7676_dma_configuration();
+	ad7676_reset();
+
 }
 
 int ad7676_calculate_output(int32_t sample){
@@ -148,19 +150,23 @@ void ad7676_read_one_sample() //when BUSY goes down
 void ad7676_read_samples(uint32_t samples){
 	awaited_samples = samples;
 	collect_data = true;
+	if (continuous_mode){
+		HAL_TIM_OC_Start_IT(&htim4, TIM_CHANNEL_4);
+	}
+	else ad7676_start_conversion();
 }
 
 void ad7676_read_continuous(bool enable){
 	continuous_mode = enable;
 }
 
-void ad7676_display_samples(uint32_t awaited_samples, uint16_t* received_samples, void (*displayFunction)(char* message)){
+void ad7676_display_samples(uint32_t awaited_samples, uint32_t* received_samples, void (*displayFunction)(char* message)){
 	char buffer[64];
 	int v1, v2, v3, v4;
 	uint32_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
 	collect_data = false;
 	*received_samples = 0;
-	sprintf(buffer, "Collected samples:%d\n\rCHANNEL1 CHANNEL2 CHANNEL3 CHANNEL4\n\r", awaited_samples);
+	sprintf(buffer, "Collected samples:%ld\n\rCHANNEL1 CHANNEL2 CHANNEL3 CHANNEL4\n\r", awaited_samples);
 	displayFunction(buffer);
 	for(uint32_t i=0; i<awaited_samples; i++){
 		v1 = ad7676_calculate_output(ad7676_data->data_buf[(tmp_ptr + i)%ad7676_data->data_ptr_max][0]);
@@ -177,7 +183,7 @@ void ad7676_display_samples(uint32_t awaited_samples, uint16_t* received_samples
 	}
 }
 
-void ad7676_send_samples(uint32_t awaited_samples, uint16_t* received_samples, UART_HandleTypeDef* huart){
+void ad7676_send_samples(uint32_t awaited_samples, uint32_t* received_samples, UART_HandleTypeDef* huart){
 	uint32_t tmp_ptr = ad7676_data->data_ptr - awaited_samples;
     collect_data = false;
     *received_samples = 0;
@@ -188,6 +194,17 @@ void ad7676_send_samples(uint32_t awaited_samples, uint16_t* received_samples, U
         memcpy(frame+3, &(ad7676_data->data_buf[(tmp_ptr + i) % ad7676_data->data_ptr_max]), 8); //bytes order frame[2] low_byte, frame[3] high_byte
         HAL_UART_Transmit(huart, frame, 11, 1000);
     }
+}
+
+void ad7676_send_sample(UART_HandleTypeDef* huart, uint32_t* received_samples){
+	uint8_t frame[11];
+	memcpy(frame, received_samples, 3); //first 2 bytes for sample index
+	memcpy(frame+3, &(ad7676_data->data_buf[ad7676_data->data_ptr-1]), 8); //bytes order frame[2] low_byte, frame[3] high_byte
+	HAL_UART_Transmit(huart, frame, 11, 1000);
+}
+
+void ad7676_set_sampling_rate(uint16_t sampling_rate){
+	sampling_rate = sampling_rate;
 }
 
 void ad7676_reset_data(data_Collector_TypeDef* ad7676_data)
@@ -207,3 +224,10 @@ void ad7676_start_conversion()
 	AD7676_CONVST_DELAY;
 	AD7676_CNVST_ON;
 }
+
+void ad7676_reset(){
+	AD7676_RESET_ON;
+	AD7676_RESET_DELAY;
+	AD7676_RESET_OFF;
+}
+
