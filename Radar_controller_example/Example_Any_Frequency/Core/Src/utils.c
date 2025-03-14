@@ -16,6 +16,7 @@
 
 extern struct adf5355_init_param hadf5355;
 extern data_Collector_TypeDef* ad7676_data;
+extern bool continuous_mode;
 uint64_t start_time = 0;
 bool raw_data = false;
 
@@ -54,10 +55,30 @@ void* SetADCMode(void* state){
 	return &ret;
 }
 
+void* SetADCRange(void* state){
+	static bool ret;
+	uint16_t* value = (uint16_t*)state;
+	if (*value > 3) ret = false;
+	else {
+		uint16_t buffer[] = {(uint16_t)(0x03<<8)+(*value<<4)+(*value), (uint16_t)(0x04<<8)+(*value<<4)+(*value)};
+		ad7676_write_register(buffer, 2);
+		ret = true;
+	}
+	return &ret;
+}
+
+void* ReadADCRange(void* state){
+	static bool ret;
+	uint16_t buffer[] = {(uint16_t)(0x03<<8)+(uint16_t)(0x1<<14), (uint16_t)(0x04<<8)+(uint16_t)(0x1<<14)};
+	ad7676_write_register(buffer, 2);
+	ret = true;
+	return &ret;
+}
+
 void* ReadADC(void* samples){
 	static bool ret;
 	uint32_t* value = (uint32_t*)samples;
-	if (*value <= 0 && *value > ad7676_data->data_ptr_max) ret = false;
+	if (*value <= 0 && ((*value > ad7676_data->data_ptr_max && continuous_mode == 0) || continuous_mode == 1)) ret = false;
 	else {
 		ad7676_read_samples(*value);
 		start_time = __HAL_TIM_GET_COUNTER(&htim2);
@@ -69,7 +90,7 @@ void* ReadADC(void* samples){
 void* ReadRawADC(void* samples){
 	static bool ret;
 	uint32_t* value = (uint32_t*)samples;
-	if (*value <= 0 && *value > ad7676_data->data_ptr_max) ret = false;
+	if (*value <= 0 && ((*value > ad7676_data->data_ptr_max && continuous_mode == 0) || continuous_mode == 1)) ret = false;
 	else {
 		ad7676_read_samples(*value);
 		raw_data = true;
@@ -80,7 +101,8 @@ void* ReadRawADC(void* samples){
 }
 
 void* ResetADC(void* arg){
-	static bool ret = false;
+	static bool ret = true;
 	ad7676_reset();
 	return &ret;
 }
+

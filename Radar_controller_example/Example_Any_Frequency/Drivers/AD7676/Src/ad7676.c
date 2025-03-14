@@ -23,9 +23,9 @@ static uint64_t start_time, end_time, elapsed_time = 0;
 
 static void ad7676_spi_configuration(){
 //	SPI_CR1_BIDIMODE 0
-//	SPI_CR1_BIDIOE 0
+//	SPI2->CR1  |= SPI_CR1_BIDIOE; //0
 //	SPI2->CR1 |= SPI_CR1_CRCEN;
-	SPI2->CR1 |= SPI_CR1_RXONLY;
+	SPI2->CR1 |= SPI_CR1_RXONLY; //0
 //	SPI_CR1_LSBFIRST 0
 //	SPI2->CR1 |= SPI_CR1_SPE; //enable when ready
 	SPI2->CR1 |= (SPI_CR1_BR_0 | SPI_CR1_BR_1); //ultimately leave 0
@@ -70,7 +70,7 @@ static void ad7676_clock_configuration(){
 	__HAL_RCC_GPIOC_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = GPIO_PIN_2;
+    GPIO_InitStruct.Pin = GPIO_PIN_2;//|GPIO_PIN_3;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -123,6 +123,31 @@ static void ad7676_dma_enable_stream(uint16_t data_size, uint32_t src_addr, uint
 	DMA1_Channel4->CNDTR = data_size;
 	DMA1_Channel4->CPAR = src_addr;
 	DMA1_Channel4->CMAR = dst_addr;
+}
+
+
+void ad7676_write_register(uint16_t* data, uint8_t length)
+{
+	uint8_t buffer_ptr = length;
+	AD7676_CS_OFF;
+//	SPI2->CR2 &= ~SPI_CR2_RXNEIE;
+	SPI2->CR1 &= ~(SPI_CR1_SPE);
+//	if ((SPI2->CR1 & SPI_CR1_SPE) != SPI_CR1_SPE)
+//		SPI2->CR1 |= SPI_CR1_SPE;
+	while(buffer_ptr > 0){
+		if(SPI2->SR & SPI_FLAG_TXE){
+			SPI2->DR = 0x0F;//data[length - buffer_ptr];
+			SPI2->DR = 0x0A;//data[length - buffer_ptr];
+			SPI2->DR = 0x0C;//data[length - buffer_ptr];
+			buffer_ptr -= 1;
+		}
+	}
+	SPI2->CR2 |= SPI_CR2_RXNEIE;
+	while(SPI2->SR & SPI_FLAG_FTLVL);
+	while(SPI2->SR & SPI_FLAG_BSY);
+	uint8_t temp = SPI2->DR;
+			temp = SPI2->SR;
+	AD7676_CS_ON;
 }
 
 void ad7676_spi_read_raw(uint8_t* buf, uint16_t size){

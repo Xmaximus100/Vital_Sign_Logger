@@ -24,10 +24,13 @@ at_Commands_TypeDef at_cmds[] = {
 	{"MUXOUT", "MUXOUT set to %d\n\r", "Type MUXOUT - THREE_STATE, VDD, GROUND, R_DIV, N_DIV, AN_LD, DIG_LD\n\r", ADF5355_SetMuxOut, 0},
 	{"EN", "EN set to %d\n\r", "Type EN 0 or 1\n\r", ADF5355_Enable, 0},
 	{"RUN", "New configuration applied\n\r", "New configuration failed to apply\n\r", ADF5355_Run, 1},
-	{"SETUP", "Configuration succeed\n\r", "Configuration failed\n\r", ADF5355_Load, 1},
-	{"CONMODE", "ADC Set Mode success\n\r", "ADC Set Mode failed\n\r", SetADCMode, 0},
-	{"READ", "ADC Read success\n\r", "ADC Read failed\n\r", ReadADC, 0},
-	{"READRAW", "11111111111", "00000000000", ReadRawADC, 0}
+	{"SETUP", "Configuration succeed\n\r", "Configuration failure\n\r", ADF5355_Load, 1},
+	{"CONMODE", "ADC Set Mode success\n\r", "ADC Set Mode failure\n\r", SetADCMode, 0},
+	{"READ", "ADC Read success\n\r", "ADC Read failure\n\r", ReadADC, 0},
+	{"READRAW", "11111111111", "00000000000", ReadRawADC, 0},
+	{"RESET", "ADC Reset success", "ADC Reset failure", ReadRawADC, 1},
+	{"RANGE", "ADC Range set successfully", "ADC Range set failed", SetADCRange, 0},
+	{"READRANGE", "ADC Range read successfully", "ADC Range read failed", ReadADCRange, 1}
 };
 
 void ParserTakeLine(RingBuffer* buffer, uint8_t* destination){
@@ -49,7 +52,7 @@ void ParserParse(char* received_string){
 	char* endptr;
 	char* parse_pointer = strtok(received_string, "=");
 	int32_t value = strtol(strtok(NULL,","), &endptr, 10);
-	char buffer[100];
+	char buffer[102];
 	bool cmd_matched = false;
 	for (int i=0; i<sizeof(at_cmds)/sizeof(at_Commands_TypeDef); i++){
 		if(strcmp(at_cmds[i].command, parse_pointer) == 0){
@@ -64,7 +67,7 @@ void ParserParse(char* received_string){
 		}
 	}
 	if (!cmd_matched){
-		sprintf(buffer, "Available commands are LED, FREQOut, FREQIn, POW, CURR, MUXOUT, EN, RUN, SETUP and READ\n\r");
+		sprintf(buffer, "Available commands are LED, FREQOut, FREQIn, POW, CURR, MUXOUT, EN, RUN, SETUP, READRAW and RESET\n\r");
 	}
 	UARTLog(buffer);
 }

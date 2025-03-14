@@ -382,8 +382,9 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	if (GPIO_Pin == ADC_BUSY_Pin && collect_data){
-		ad7676_read_one_sample();
+	if (GPIO_Pin == ADC_BUSY_Pin){
+		if (collect_data) ad7676_read_one_sample();
+		else HAL_TIM_OC_Stop_IT(&htim4, TIM_CHANNEL_4);
 //		osThreadFlagsSet(adc_handlerHandle, 0x01);
 //		if(busy_dropped == false)
 //		busy_dropped = true;

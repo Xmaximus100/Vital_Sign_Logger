@@ -55,6 +55,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern SPI_HandleTypeDef hspi2;
 extern TIM_HandleTypeDef htim4;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern DMA_HandleTypeDef hdma_usart2_tx;
@@ -218,6 +219,20 @@ void TIM4_IRQHandler(void)
 
   /* USER CODE END TIM4_IRQn 1 */
 }
+
+/**
+  * @brief This function handles SPI2 global interrupt.
+  */
+//void SPI2_IRQHandler(void)
+//{
+//  /* USER CODE BEGIN SPI2_IRQn 0 */
+//
+//  /* USER CODE END SPI2_IRQn 0 */
+//  HAL_SPI_IRQHandler(&hspi2);
+//  /* USER CODE BEGIN SPI2_IRQn 1 */
+//
+//  /* USER CODE END SPI2_IRQn 1 */
+//}
 
 /**
   * @brief This function handles USART2 global interrupt.
