@@ -28,9 +28,9 @@ at_Commands_TypeDef at_cmds[] = {
 	{"CONMODE", "ADC Set Mode success\n\r", "ADC Set Mode failure\n\r", SetADCMode, 0},
 	{"READ", "ADC Read success\n\r", "ADC Read failure\n\r", ReadADC, 0},
 	{"READRAW", "11111111111", "00000000000", ReadRawADC, 0},
-	{"RESET", "ADC Reset success", "ADC Reset failure", ReadRawADC, 1},
-	{"RANGE", "ADC Range set successfully", "ADC Range set failed", SetADCRange, 0},
-	{"READRANGE", "ADC Range read successfully", "ADC Range read failed", ReadADCRange, 1}
+	{"RESET", "ADC Reset success\n\r", "ADC Reset failure\n\r", ReadRawADC, 1},
+	{"RANGE", "ADC success\n\r", "ADC failure\n\r", SetADCRange, 0},
+	{"READRANGE", "ADC success\n\r", "ADC failure\n\r", ReadADCRange, 1}
 };
 
 void ParserTakeLine(RingBuffer* buffer, uint8_t* destination){
@@ -51,7 +51,8 @@ void ParserTakeLine(RingBuffer* buffer, uint8_t* destination){
 void ParserParse(char* received_string){
 	char* endptr;
 	char* parse_pointer = strtok(received_string, "=");
-	int32_t value = strtol(strtok(NULL,","), &endptr, 10);
+	char* arg = strtok(NULL, ",");
+	int32_t value = (arg==NULL)?0:strtol(arg, &endptr, 10);
 	char buffer[102];
 	bool cmd_matched = false;
 	for (int i=0; i<sizeof(at_cmds)/sizeof(at_Commands_TypeDef); i++){

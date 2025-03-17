@@ -89,18 +89,11 @@ const osThreadAttr_t adc_handler_attributes = {
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
-/* Definitions for pll_handler */
-osThreadId_t pll_handlerHandle;
-const osThreadAttr_t pll_handler_attributes = {
-  .name = "pll_handler",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
 /* Definitions for at_cmds_handler */
 osThreadId_t at_cmds_handlerHandle;
 const osThreadAttr_t at_cmds_handler_attributes = {
   .name = "at_cmds_handler",
-  .stack_size = 256 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityHigh,
 };
 
@@ -111,7 +104,6 @@ const osThreadAttr_t at_cmds_handler_attributes = {
 
 void StartDefaultTask(void *argument);
 void StartADC(void *argument);
-void StartPLL(void *argument);
 void StartATCmds(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -148,9 +140,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of adc_handler */
   adc_handlerHandle = osThreadNew(StartADC, NULL, &adc_handler_attributes);
-
-  /* creation of pll_handler */
-  pll_handlerHandle = osThreadNew(StartPLL, NULL, &pll_handler_attributes);
 
   /* creation of at_cmds_handler */
   at_cmds_handlerHandle = osThreadNew(StartATCmds, NULL, &at_cmds_handler_attributes);
@@ -227,28 +216,6 @@ void StartADC(void *argument)
 		}
 	}
   /* USER CODE END StartADC */
-}
-
-/* USER CODE BEGIN Header_StartPLL */
-/**
-* @brief Function implementing the pll_handler thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartPLL */
-void StartPLL(void *argument)
-{
-  /* USER CODE BEGIN StartPLL */
-
-//	ADF5355_Param_Init();
-//	basic_example_main(&hadf5355);
-  /* Infinite loop */
-	for(;;)
-	{
-//		UARTLog("Hello World\n\r");
-		osDelay(10);
-	}
-  /* USER CODE END StartPLL */
 }
 
 /* USER CODE BEGIN Header_StartATCmds */
@@ -336,6 +303,7 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi){
 }
 
 void SPI2_IRQHandler(void){
+
 	SPI2->CR1 &= ~SPI_CR1_SPE;
 	while((SPI2->CR1 & SPI_CR1_SPE) != 0);
 //	while((SPI2->SR & SPI_SR_FRLVL) != 0);
@@ -348,14 +316,19 @@ void DMA1_Channel4_IRQHandler(void) //Remember to comment out this line in stm32
 	if(DMA1->ISR & DMA_ISR_TCIF4){
 
 		SPI2->CR2 &= ~(SPI_CR2_RXDMAEN);
-		SPI2->CR1 &= ~(SPI_CR1_SPE);
-		while((SPI2->SR & SPI_SR_BSY) != 0);
 		DMA1->IFCR |= DMA_IFCR_CTCIF4; // clear interrupt
+		__NVIC_ClearPendingIRQ(DMA1_Channel4_IRQn);
+		while(SPI2->SR & SPI_FLAG_FTLVL){
+			uint8_t temp = SPI2->DR;
+					temp = SPI2->SR;
+		};
+		SPI2->CR1 &= ~(SPI_CR1_SPE);
+		while((SPI2->SR & SPI_SR_BSY) != 0)
 		SPI2->CR2 &= ~SPI_CR2_RXNEIE;
 		AD7676_CS_ON;
 		ad7676_data->data_ptr = (ad7676_data->data_ptr + 1) % ad7676_data->data_ptr_max;
-		received_samples++;
-		if (received_samples < awaited_samples){
+		if (!collect_data) return;
+		else if (received_samples++ < awaited_samples){
 			if (continuous_mode){
 				ad7676_send_sample(&huart2, &received_samples);
 			}
@@ -364,6 +337,14 @@ void DMA1_Channel4_IRQHandler(void) //Remember to comment out this line in stm32
 		}
 		else osThreadFlagsSet(adc_handlerHandle, 0x01);
 	} //do sth if DMA transfer complete is raised
+}
+
+void DMA1_Channel5_IRQHandler(void) {
+    if (DMA1->ISR & DMA_ISR_TCIF5) { // Sprawdzamy flagę zakończenia transferu dla kanału TX
+        DMA1->IFCR |= DMA_IFCR_CTCIF5;  // Czyścimy flagę przerwania
+        DMA1_Channel5->CCR &= ~DMA_CCR_EN;  // Wyłączamy TX DMA
+        // Tutaj możesz dodać dodatkowe działania, np. ustawienie CS do stanu wysokiego
+    }
 }
 
 void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi){

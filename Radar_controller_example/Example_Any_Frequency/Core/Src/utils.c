@@ -58,10 +58,13 @@ void* SetADCMode(void* state){
 void* SetADCRange(void* state){
 	static bool ret;
 	uint16_t* value = (uint16_t*)state;
-	if (*value > 3) ret = false;
+	if (*value > 2) ret = false;
 	else {
-		uint16_t buffer[] = {(uint16_t)(0x03<<8)+(*value<<4)+(*value), (uint16_t)(0x04<<8)+(*value<<4)+(*value)};
-		ad7676_write_register(buffer, 2);
+		ad7676_data->range_select = *value;
+		uint16_t buffer[] = {(uint16_t)(0x03<<8)+(*value<<4)+(*value), (uint16_t)(0x04<<8)+(*value<<4)+(*value), (uint16_t)0x0000};
+//		ad7676_write_register(buffer, 3);
+		ad7676_spi_write_read_raw(buffer, &ad7676_data->rx_buffer[ad7676_data->rx_buffer_ptr], 3);
+		ad7676_data->rx_buffer_ptr = (ad7676_data->rx_buffer_ptr + 3) % ad7676_data->rx_buffer_ptr_max;
 		ret = true;
 	}
 	return &ret;
@@ -69,8 +72,10 @@ void* SetADCRange(void* state){
 
 void* ReadADCRange(void* state){
 	static bool ret;
-	uint16_t buffer[] = {(uint16_t)(0x03<<8)+(uint16_t)(0x1<<14), (uint16_t)(0x04<<8)+(uint16_t)(0x1<<14)};
-	ad7676_write_register(buffer, 2);
+	uint16_t buffer[] = {(uint16_t)(0x03<<8)+(uint16_t)(0x1<<14), (uint16_t)(0x04<<8)+(uint16_t)(0x1<<14), (uint16_t)0x0000+(uint16_t)(0x1<<14)};
+//	ad7676_write_register(buffer, 3);
+	ad7676_spi_write_read_raw(buffer, &ad7676_data->rx_buffer[ad7676_data->rx_buffer_ptr], 3);
+	ad7676_data->rx_buffer_ptr = (ad7676_data->rx_buffer_ptr + 3) % ad7676_data->rx_buffer_ptr_max;
 	ret = true;
 	return &ret;
 }
