@@ -205,6 +205,7 @@ void StartADC(void *argument)
 //		uint32_t read_freq = base_freq/read_time;
 		uint32_t collect_freq = (base_freq*awaited_samples)/elapsed_time;
 		char buffer[50];
+		if(continuous_mode) continue;
 		if(raw_data){
 			ad7676_send_samples(awaited_samples, &received_samples, &huart2);
 			raw_data = false;
@@ -326,13 +327,13 @@ void DMA1_Channel4_IRQHandler(void) //Remember to comment out this line in stm32
 		while((SPI2->SR & SPI_SR_BSY) != 0)
 		SPI2->CR2 &= ~SPI_CR2_RXNEIE;
 		AD7676_CS_ON;
-		ad7676_data->data_ptr = (ad7676_data->data_ptr + 1) % ad7676_data->data_ptr_max;
 		if (!collect_data) return;
 		else if (received_samples++ < awaited_samples){
 			if (continuous_mode){
 				ad7676_send_sample(&huart2, &received_samples);
 			}
 			else ad7676_start_conversion();
+			ad7676_data->data_ptr = (ad7676_data->data_ptr + 1) % ad7676_data->data_ptr_max;
 //			continue;
 		}
 		else osThreadFlagsSet(adc_handlerHandle, 0x01);

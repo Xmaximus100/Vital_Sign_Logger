@@ -320,7 +320,7 @@ void ad7676_send_samples(uint32_t awaited_samples, uint32_t* received_samples, U
 void ad7676_send_sample(UART_HandleTypeDef* huart, uint32_t* received_samples){
 	uint8_t frame[11];
 	memcpy(frame, received_samples, 3); //first 2 bytes for sample index
-	memcpy(frame+3, &(ad7676_data->data_buf[ad7676_data->data_ptr-1]), 8); //bytes order frame[2] low_byte, frame[3] high_byte
+	memcpy(frame+3, &(ad7676_data->data_buf[(ad7676_data->data_ptr-1) % ad7676_data->data_ptr_max]), 8); //bytes order frame[2] low_byte, frame[3] high_byte
 	HAL_UART_Transmit(huart, frame, 11, 1000);
 }
 
