@@ -27,7 +27,7 @@ at_Commands_TypeDef at_cmds[] = {
 	{"SETUP", "Configuration succeed\n\r", "Configuration failure\n\r", ADF5355_Load, 1},
 	{"CONMODE", "ADC Set Mode success\n\r", "ADC Set Mode failure\n\r", SetADCMode, 0},
 	{"READ", "ADC Read success\n\r", "ADC Read failure\n\r", ReadADC, 0},
-	{"READRAW", "11111111111", "00000000000", ReadRawADC, 0},
+	{"READRAW", "", "", ReadRawADC, 0},
 	{"RESET", "ADC Reset success\n\r", "ADC Reset failure\n\r", ReadRawADC, 1},
 	{"RANGE", "ADC success\n\r", "ADC failure\n\r", SetADCRange, 0},
 	{"READRANGE", "ADC success\n\r", "ADC failure\n\r", ReadADCRange, 1}
@@ -70,5 +70,6 @@ void ParserParse(char* received_string){
 	if (!cmd_matched){
 		sprintf(buffer, "Available commands are LED, FREQOut, FREQIn, POW, CURR, MUXOUT, EN, RUN, SETUP, READRAW and RESET\n\r");
 	}
+	if (strcmp(buffer, "") == 0) return;
 	UARTLog(buffer);
 }
